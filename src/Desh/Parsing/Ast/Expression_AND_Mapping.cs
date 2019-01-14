@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace Desh.Core.Parsing.Ast
+namespace Desh.Parsing.Ast
 {
     public class Expression_AND_Mapping : ExpressionBlock
     {

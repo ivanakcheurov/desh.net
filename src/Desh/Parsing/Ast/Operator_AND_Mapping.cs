@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Linq;
 
-namespace Desh.Core.Parsing.Ast
+namespace Desh.Parsing.Ast
 {
     // ReSharper disable once InconsistentNaming
     public class Operator_AND_Mapping : Comparator

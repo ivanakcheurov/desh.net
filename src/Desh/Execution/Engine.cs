@@ -1,7 +1,6 @@
-﻿using Desh.Core.Parsing;
-using Desh.Core.Parsing.Ast;
+﻿using Desh.Parsing.Ast;
 
-namespace Desh.Core.Execution
+namespace Desh.Execution
 {
     public class Engine
     {

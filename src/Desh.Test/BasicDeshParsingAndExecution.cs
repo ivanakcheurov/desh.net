@@ -1,12 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Desh.Core.Execution;
-using Desh.Core.Parsing;
+using Desh.Execution;
+using Desh.Parsing;
 using Newtonsoft.Json;
 using Xunit;
 
-namespace Core.Test
+namespace Desh.Test
 {
     public class BasicDeshParsingAndExecution
     {

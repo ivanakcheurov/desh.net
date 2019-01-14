@@ -2,13 +2,13 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Desh.Core.Parsing.Ast;
+using Desh.Parsing.Ast;
 using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
 
-namespace Desh.Core.Parsing
+namespace Desh.Parsing
 {
     public class DeshParser
     {

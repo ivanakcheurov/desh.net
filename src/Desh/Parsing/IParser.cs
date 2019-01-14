@@ -1,4 +1,4 @@
-﻿namespace Desh.Core.Parsing
+﻿namespace Desh.Parsing
 {
     interface IParser
     {

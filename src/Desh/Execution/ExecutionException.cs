@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Runtime.Serialization;
 
-namespace Desh.Core.Execution
+namespace Desh.Execution
 {
     public class ExecutionException : Exception
     {

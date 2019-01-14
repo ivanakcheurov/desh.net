@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Runtime.Serialization;
 
-namespace Desh.Core.Parsing
+namespace Desh.Parsing
 {
     public class ParseException : Exception
     {

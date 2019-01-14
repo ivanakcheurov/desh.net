@@ -1,4 +1,4 @@
-﻿namespace Desh.Core.Execution
+﻿namespace Desh.Execution
 {
     public class Conclusion : EvaluationResult
     {

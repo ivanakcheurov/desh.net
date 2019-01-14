@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.28307.106
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Core", "Core\Core.csproj", "{74F63984-5DDE-4459-A1D4-3C3E82A9FA7A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Desh", "Desh\Desh.csproj", "{74F63984-5DDE-4459-A1D4-3C3E82A9FA7A}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Core.Test", "Core.Test\Core.Test.csproj", "{DBA6817C-3CB4-4843-B84D-7C726580E090}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Desh.Test", "Desh.Test\Desh.Test.csproj", "{DBA6817C-3CB4-4843-B84D-7C726580E090}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

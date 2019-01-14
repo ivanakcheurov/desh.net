@@ -1,4 +1,4 @@
-﻿namespace Desh.Core.Parsing.Ast
+﻿namespace Desh.Parsing.Ast
 {
     public class ExpressionBlock
     {
