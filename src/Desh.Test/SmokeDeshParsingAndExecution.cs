@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using Desh.Execution;
 using Desh.Parsing;
@@ -8,7 +9,7 @@ using Xunit;
 
 namespace Desh.Test
 {
-    public class BasicDeshParsingAndExecution
+    public class SmokeDeshParsingAndExecution
     {
         private const string Desh = @"
 someProp:
@@ -195,15 +196,17 @@ decide: decision_A", "{a: 'R'}", null)]
 a: 
   - .equals: a1
 decide: decision_A", "{a: 'R'}", null)]
-
-
-
         public void Picks_correct_decision(string desh, string contextJson, string expectedDecision)
         {
+            ParseExecuteTestRunner.AssertPicksCorrectDecision(desh, contextJson, expectedDecision);
+        }
+
+        public void OtherTest()
+        {
             var parser = new DeshParser();
-            
-            var ast = parser.Parse(desh);
-            var context = JsonConvert.DeserializeObject<Dictionary<string, string>>(contextJson);
+
+            var ast = parser.Parse(File.ReadAllText(@"C:\Users\Ivan\Downloads\CMRBD_cutoff_rules.yml"));
+            var context = JsonConvert.DeserializeObject<Dictionary<string, string>>("{isHomeCountry: 'yes', }");
 
             var vars = new VariableEvaluator(context);
             var opDic = new Dictionary<string, Func<string, string[], bool>>
@@ -214,14 +217,9 @@ decide: decision_A", "{a: 'R'}", null)]
             var ops = new OperatorEvaluator(opDic);
             var engine = new Engine(vars, ops, true);
             var result = engine.Execute(ast);
-            if (expectedDecision == null)
-            {
-                Assert.Null(result);
-            }
-            else
-            {
-                Assert.Equal(expectedDecision, Assert.Single(Assert.IsType<Conclusion>(result).Decisions));
-            }
+            
+            //Assert.Equal(expectedDecision, Assert.Single(Assert.IsType<Conclusion>(result).Decisions));
+            
         }
     }
 }

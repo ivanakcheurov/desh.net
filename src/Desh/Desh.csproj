@@ -20,6 +20,14 @@ desh (Decision Expressions) is a concise language for defining business rules.</
     <AssemblyName>desh</AssemblyName>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DocumentationFile>D:\work\desh.net\src\Desh\desh.xml</DocumentationFile>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <DocumentationFile>D:\work\desh.net\src\Desh\desh.xml</DocumentationFile>
+  </PropertyGroup>
+
   <ItemGroup>
     <PackageReference Include="YamlDotNet.Signed" Version="5.3.0" />
   </ItemGroup>
