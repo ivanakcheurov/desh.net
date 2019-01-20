@@ -1,6 +1,6 @@
 ﻿namespace Desh.Parsing.Ast
 {
-    public class Comparator
+    public class Comparator : Node
     {
 
     }

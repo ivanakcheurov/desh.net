@@ -29,7 +29,7 @@ someProp:
 decide: YES
 ";
 
-        public class VariableEvaluator : IVariableEvaluator
+        public class VariableEvaluator : IVariableEvaluator, INameRecognizer
         {
             private readonly Dictionary<string, string> _variableValues;
 
@@ -42,9 +42,14 @@ decide: YES
             {
                 return _variableValues[variable];
             }
+
+            public bool Recognize(string name)
+            {
+                return _variableValues.ContainsKey(name);
+            }
         }
 
-        public class OperatorEvaluator : IOperatorEvaluator
+        public class OperatorEvaluator : IOperatorEvaluator, INameRecognizer
         {
             private readonly Dictionary<string, Func<string, string[], bool>> _operators;
 
@@ -56,6 +61,11 @@ decide: YES
             public bool Evaluate(string variableValue, string operatorName, string[] arguments)
             {
                 return _operators[operatorName](variableValue, arguments);
+            }
+
+            public bool Recognize(string name)
+            {
+                return _operators.ContainsKey(name);
             }
         }
 
@@ -201,25 +211,26 @@ decide: decision_A", "{a: 'R'}", null)]
             ParseExecuteTestRunner.AssertPicksCorrectDecision(desh, contextJson, expectedDecision);
         }
 
-        public void OtherTest()
-        {
-            var parser = new DeshParser();
+        //public void OtherTest()
+        //{
+        //    var parser = new DeshParser();
 
-            var ast = parser.Parse(File.ReadAllText(@"C:\Users\Ivan\Downloads\CMRBD_cutoff_rules.yml"));
-            var context = JsonConvert.DeserializeObject<Dictionary<string, string>>("{isHomeCountry: 'yes', }");
+        //    var parseLogger = new ParseLogger();
+        //    var ast = parser.Parse(File.ReadAllText(@"C:\Users\Ivan\Downloads\CMRBD_cutoff_rules.yml"), parseLogger);
+        //    var context = JsonConvert.DeserializeObject<Dictionary<string, string>>("{isHomeCountry: 'yes', }");
 
-            var vars = new VariableEvaluator(context);
-            var opDic = new Dictionary<string, Func<string, string[], bool>>
-            {
-                { ".equals", (varValue, allowedVariants) => allowedVariants.Any(variant => StringComparer.InvariantCultureIgnoreCase.Compare(varValue, variant) == 0) },
-                { ".hasLength", (varValue, allowedLengths) => allowedLengths.Any(length => varValue.Length == int.Parse(length)) },
-            };
-            var ops = new OperatorEvaluator(opDic);
-            var engine = new Engine(vars, ops, true);
-            var result = engine.Execute(ast);
+        //    var vars = new VariableEvaluator(context);
+        //    var opDic = new Dictionary<string, Func<string, string[], bool>>
+        //    {
+        //        { ".equals", (varValue, allowedVariants) => allowedVariants.Any(variant => StringComparer.InvariantCultureIgnoreCase.Compare(varValue, variant) == 0) },
+        //        { ".hasLength", (varValue, allowedLengths) => allowedLengths.Any(length => varValue.Length == int.Parse(length)) },
+        //    };
+        //    var ops = new OperatorEvaluator(opDic);
+        //    var engine = new Engine(vars, ops, true);
+        //    var result = engine.Execute(ast);
             
-            //Assert.Equal(expectedDecision, Assert.Single(Assert.IsType<Conclusion>(result).Decisions));
+        //    //Assert.Equal(expectedDecision, Assert.Single(Assert.IsType<Conclusion>(result).Decisions));
             
-        }
+        //}
     }
 }

@@ -1,6 +1,6 @@
 ﻿namespace Desh.Parsing.Ast
 {
-    public class ExpressionBlock
+    public class ExpressionBlock : Node
     {
 
     }

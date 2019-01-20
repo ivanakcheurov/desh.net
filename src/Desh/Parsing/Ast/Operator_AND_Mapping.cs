@@ -6,6 +6,10 @@ namespace Desh.Parsing.Ast
     // ReSharper disable once InconsistentNaming
     public class Operator_AND_Mapping : Comparator
     {
+        public Operator_AND_Mapping()
+        {
+        }
+
         public Operator_AND_Mapping(Operator[] operators, ExpressionBlock thenExpressionBlock, DecisionLeaf decision)
         {
             if (operators == null || operators.Any() == false)
@@ -20,8 +24,8 @@ namespace Desh.Parsing.Ast
             Decision = decision;
         }
 
-        public Operator[] Operators { get; }
-        public ExpressionBlock ThenExpressionBlock { get; }
-        public DecisionLeaf Decision { get; }
+        public Operator[] Operators { get; set; }
+        public ExpressionBlock ThenExpressionBlock { get; set; }
+        public DecisionLeaf Decision { get; set; }
     }
 }

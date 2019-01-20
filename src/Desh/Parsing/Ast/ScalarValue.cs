@@ -2,6 +2,9 @@
 {
     public class ScalarValue : Comparator
     {
+        public ScalarValue()
+        {
+        }
         public string Value { get; set; }
     }
 }
