@@ -15,11 +15,15 @@ namespace Desh.Test
     {
         public static void AssertPicksCorrectDecision(string desh, string contextJson, string expectedDecision)
         {
+            var vars = JsonConvert.DeserializeObject<Dictionary<string, string>>(contextJson);
+            AssertPicksCorrectDecision(null, null, desh, vars, expectedDecision);
+        }
+        public static void AssertPicksCorrectDecision(string name, TestCaseSource source, string desh, Dictionary<string, string> vars, string expectedDecision)
+        {
             var parser = new DeshParser();
 
-            var context = JsonConvert.DeserializeObject<Dictionary<string, string>>(contextJson);
 
-            var vars = new SmokeDeshParsingAndExecution.VariableEvaluator(context);
+            var varsEv = new SmokeDeshParsingAndExecution.VariableEvaluator(vars);
             var opDic = new Dictionary<string, Func<string, string[], bool>>
             {
                 { ".equals", Equal },
@@ -32,7 +36,7 @@ namespace Desh.Test
             };
             var ops = new SmokeDeshParsingAndExecution.OperatorEvaluator(opDic);
             var parseLogger = new ParseLogger();
-            var ctx = new Context(parseLogger, vars, ops);
+            var ctx = new Context(parseLogger, varsEv, ops);
             var ast = parser.Parse(desh, ctx);
             var astJson = JsonConvert.SerializeObject(ast);
             var serializerBuilder = new SerializerBuilder();
@@ -47,7 +51,7 @@ namespace Desh.Test
             var serializer = serializerBuilder.EnsureRoundtrip().Build();
             var astYaml = serializer.Serialize(ast);
 
-            var engine = new Engine(vars, ops, true);
+            var engine = new Engine(varsEv, ops, true);
             var result = engine.Execute(ast);
             if (expectedDecision == null)
             {

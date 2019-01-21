@@ -192,25 +192,11 @@ namespace Desh.Test
                 - isBetween: [2018-12-01, 2018-12-06 21:59:59]
               then: 2018-12-24
 ";
-        // resharper's or xUnit's itself test detection deduplicated tests by a certain
-        // amount of characters from the beginning of the string of InlideData.
-        // Which means it skips some tests if they look similar (though not the same)
         [Theory]
-        [InlineData(
-            "{service_paid_date: '2018-12-17 14:12:33', transport_type: 'ship', domestic_request: 'yes', channel: 'desh-trans.nl'}",
-            "2018-12-24")]
-        [InlineData(
-            "{service_paid_date: '2018-12-17 14:12:34', transport_type: 'train', domestic_request: 'yes', channel: 'desh-trans.nl'}",
-            "2018-12-24")]
-        [InlineData(
-            "{service_paid_date: '2018-12-18 14:12:35', transport_type: 'train', domestic_request: 'yes', channel: 'desh-trans.nl'}",
-            "2018-12-24")]
-        [InlineData(
-            "{service_paid_date: '2018-12-18 14:12:36', transport_type: 'ship', domestic_request: 'yes', channel: 'desh-trans.nl'}",
-            null)]
-        public void Grammar_v010(string contextJson, string expectedDecision)
+        [MemberData(nameof(YamlTestReader.GetData), parameters: "SLA.tests.yaml", MemberType = typeof(YamlTestReader))]
+        public void Grammar_v010a(string name, TestCaseSource source, string desh, Dictionary<string, string> vars, string expectedDecision)
         {
-            ParseExecuteTestRunner.AssertPicksCorrectDecision(Grammar_010, contextJson, expectedDecision);
+            ParseExecuteTestRunner.AssertPicksCorrectDecision(name, source, desh, vars, expectedDecision);
         }
 
         [Theory(Skip = "Not implemented")]
