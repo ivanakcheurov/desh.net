@@ -53,7 +53,7 @@ namespace Desh.Test
         }
 
 
-        [Theory]
+        [Theory(Skip = "Not implemented")]
         [InlineData("{airline_ICAO: 'DAL'}", "AvGas")]
         [InlineData("{airline_ICAO: 'CFL'}", "Mogas")]
         [InlineData("{airline_ICAO: 'TRA'}", "Mogas")]

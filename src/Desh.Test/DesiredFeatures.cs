@@ -28,7 +28,7 @@ vehicle_type:
     - passenger_car: gas
 ";
 
-        [Theory]
+        [Theory(Skip = "Not implemented")]
         [InlineData(DecideIf, "{vehicle_type: 'van'}", "diesel")]
         [InlineData(DecideIf, "{vehicle_type: 'cruise_ship'}", "diesel")]
         [InlineData(DecideIf, "{vehicle_type: 'jet'}", null)]
