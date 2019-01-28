@@ -31,6 +31,7 @@ namespace Desh.Test
                 { ".hasLength", (varValue, allowedLengths) => allowedLengths.Any(length => varValue.Length == int.Parse(length)) },
                 { ".between", IsBetween },
                 { "isBetween", IsBetween },
+                { "numberBetween", NumberBetween },
                 { "equalsAny", Equal },
                 { "contains", Contains },
             };
@@ -75,6 +76,14 @@ namespace Desh.Test
         private static bool IsBetween(string varValue, string[] maxMinRange)
         {
             return StringComparer.InvariantCultureIgnoreCase.Compare(varValue, maxMinRange[0]) >= 0 && StringComparer.InvariantCultureIgnoreCase.Compare(varValue, maxMinRange[1]) <= 0;
+        }
+
+        private static bool NumberBetween(string varValue, string[] minMaxRange)
+        {
+            decimal varDecimal = decimal.Parse(varValue);
+            decimal minDecimal = decimal.Parse(minMaxRange[0]);
+            decimal maxDecimal = decimal.Parse(minMaxRange[1]);
+            return minDecimal <= varDecimal && varDecimal <= maxDecimal;
         }
     }
 }
