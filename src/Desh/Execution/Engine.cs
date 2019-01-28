@@ -19,6 +19,8 @@ namespace Desh.Execution
         {
             switch (expressionBlock)
             {
+                case DecisionLeaf decision:
+                    return new Conclusion(new[] {decision.Decision});
                 case Expression_OR_List list:
                     foreach (var expressionAndMapping in list.ExpressionAndMappings)
                     {
@@ -49,6 +51,18 @@ namespace Desh.Execution
                 var comparator = expressionPair.Value;
                 var result = Execute(variableValue, comparator);
                 switch (result)
+                {
+                    case null: return null;
+                    case Conclusion conclusion: return conclusion; // todo: implement stopOnFirst = false
+                    case PositiveEval _: break; // just continue to the next node
+                    default: throw new ExecutionException("Unexpected result of type: " + result.GetType().FullName);
+                }
+            }
+
+            if (expressionAndMapping.ThenExpressionBlock != null)
+            {
+                var result = Execute(expressionAndMapping.ThenExpressionBlock);
+                switch (result) //todo: remove duplication
                 {
                     case null: return null;
                     case Conclusion conclusion: return conclusion; // todo: implement stopOnFirst = false

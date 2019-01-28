@@ -206,6 +206,19 @@ decide: decision_A", "{a: 'R'}", null)]
 a: 
   - .equals: a1
 decide: decision_A", "{a: 'R'}", null)]
+        [InlineData(@"
+a: 
+  - X: decision_A
+  - Y: decision_B", "{a: 'X'}", "decision_A")]
+        [InlineData(@"
+a: 
+  - X: decision_A
+  - Y: decision_B", "{a: 'Y'}", "decision_B")]
+        [InlineData(@"
+a: 
+  - X: decision_A
+  - Y: 
+        then: decision_B", "{a: 'Y'}", "decision_B")]
         public void Picks_correct_decision(string desh, string contextJson, string expectedDecision)
         {
             ParseExecuteTestRunner.AssertPicksCorrectDecision(desh, contextJson, expectedDecision);

@@ -22,11 +22,7 @@ vehicle_type:
             has_rear_camera: yes
             decide: safe
 ";
-        private const string DecideDirectly = @"
-vehicle_type:
-    - van: diesel
-    - passenger_car: gas
-";
+        
 
         [Theory(Skip = "Not implemented")]
         [InlineData(DecideIf, "{vehicle_type: 'van'}", "diesel")]
@@ -36,8 +32,6 @@ vehicle_type:
         [InlineData(DecideExtend, "{vehicle_type: 'van', has_rear_camera: 'no'}", "['diesel']")]
         [InlineData(DecideExtend, "{vehicle_type: 'jet', has_rear_camera: 'yes'}", null)] // kerosene
         [InlineData(DecideExtend, "{vehicle_type: 'jet', has_rear_camera: 'no'}", null)]
-        [InlineData(DecideDirectly, "{vehicle_type: 'van'}", "diesel")]
-        [InlineData(DecideDirectly, "{vehicle_type: 'passenger_car'}", "gas")]
         public void Picks_correct_decision(string desh, string contextJson, string expectedDecision)
         {
             ParseExecuteTestRunner.AssertPicksCorrectDecision(desh, contextJson, expectedDecision);

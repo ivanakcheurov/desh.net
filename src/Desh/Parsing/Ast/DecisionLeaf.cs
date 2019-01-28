@@ -1,6 +1,6 @@
 ﻿namespace Desh.Parsing.Ast
 {
-    public class DecisionLeaf : Node
+    public class DecisionLeaf : ExpressionBlock
     {
         public DecisionLeaf()
         {

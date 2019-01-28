@@ -11,6 +11,7 @@ namespace Desh.Parsing.Ast
         // todo: any is true
         // todo: consider allowing inspecting the same variable multiple times
         public Dictionary<string, Comparator> NormalPairs { get; set; }
+        public ExpressionBlock ThenExpressionBlock { get; set; }
         public DecisionLeaf DecisionLeaf { get; set; }
     }
 }

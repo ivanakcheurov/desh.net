@@ -99,6 +99,12 @@ namespace Desh.Parsing
                 return true;
             }
 
+            var scalar = reader.Peek<Scalar>();
+            if (scalar != null)
+            {
+                value = (DecisionLeaf)nestedObjectDeserializer(reader, typeof(DecisionLeaf));
+                return true;
+            }
 
             value = (Expression_AND_Mapping)nestedObjectDeserializer(reader, typeof(Expression_AND_Mapping));
             return true;
@@ -135,6 +141,8 @@ namespace Desh.Parsing
                     default:
                         if (decision != null)
                             throw new ParseException("Cannot have more pairs after a DECIDE block in one Expression_AND_Mapping");
+                        if (thenBlock != null)
+                            throw new ParseException("Cannot have more pairs after a THEN block in one Expression_AND_Mapping");
                         var variable = variableScalar.Value /*.TrimEnd('?')*/;
                         var comparator = (Comparator)nestedObjectDeserializer(reader, typeof(Comparator));
                         pairs.Add(variable, comparator);
@@ -144,7 +152,7 @@ namespace Desh.Parsing
             } while (reader.Allow<MappingEnd>() == null);
 
             //var check = new Check(variableName, comparators);
-            value = new Expression_AND_Mapping { NormalPairs = pairs, DecisionLeaf = decision };
+            value = new Expression_AND_Mapping { NormalPairs = pairs, ThenExpressionBlock = thenBlock, DecisionLeaf = decision };
             return true;
         }
         public Expression_AND_Mapping_Deserializer(IContext ctx) : base(ctx) { }

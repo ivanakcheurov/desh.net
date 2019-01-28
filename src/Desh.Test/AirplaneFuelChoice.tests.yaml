@@ -1,28 +1,26 @@
 ﻿- ignore: JUST TO SET FuelChoiceDesh
-  desh: &FuelChoiceDesh | 
+  desh: &FuelChoiceDesh_020 | 
     - airline_ICAO:
-        - DAL:
-            decide: AvGas
+        - DAL: AvGas
         - .between: [KLA, KLZ]  
           decide: Mogas
-        - [CFL, TRA, TVF]: 
-            decide: Mogas
+        - [CFL, TRA, TVF]: Mogas
         - RYR:
             airport_IATA:
-              - [LON, LHR, LGW]:
-                  decide: AvGas
-              - [LCY, STN, LTN, SEN]:
-                  decide: Mogas
-- { desh: *FuelChoiceDesh, vars: {airline_ICAO: DAL}, expected: AvGas }
-- { desh: *FuelChoiceDesh, vars: {airline_ICAO: CFL}, expected: Mogas }
-- { desh: *FuelChoiceDesh, vars: {airline_ICAO: TRA}, expected: Mogas }
-- { desh: *FuelChoiceDesh, vars: {airline_ICAO: TVF}, expected: Mogas }
-- { desh: *FuelChoiceDesh, vars: {airline_ICAO: KLC}, expected: Mogas }
-- { desh: *FuelChoiceDesh, vars: {airline_ICAO: KLH}, expected: Mogas }
-- { desh: *FuelChoiceDesh, vars: { airline_ICAO: RYR, airport_IATA: LON }, expected: AvGas }
-- { desh: *FuelChoiceDesh, vars: { airline_ICAO: RYR, airport_IATA: LHR }, expected: AvGas }
-- { desh: *FuelChoiceDesh, vars: { airline_ICAO: RYR, airport_IATA: LGW }, expected: AvGas }
-- { desh: *FuelChoiceDesh, vars: { airline_ICAO: RYR, airport_IATA: LCY }, expected: Mogas }
-- { desh: *FuelChoiceDesh, vars: { airline_ICAO: RYR, airport_IATA: STN }, expected: Mogas }
-- { desh: *FuelChoiceDesh, vars: { airline_ICAO: RYR, airport_IATA: LTN }, expected: Mogas }
-- { desh: *FuelChoiceDesh, vars: { airline_ICAO: RYR, airport_IATA: SEN }, expected: Mogas }
+              - [LON, LHR, LGW]: AvGas
+              - [LCY, STN]: Mogas       #implicit "decide"
+              - [LTN, SEN]: 
+                  decide: Mogas         #excplicit "decide"
+- { desh: *FuelChoiceDesh_020, vars: {airline_ICAO: DAL}, expected: AvGas }
+- { desh: *FuelChoiceDesh_020, vars: {airline_ICAO: CFL}, expected: Mogas }
+- { desh: *FuelChoiceDesh_020, vars: {airline_ICAO: TRA}, expected: Mogas }
+- { desh: *FuelChoiceDesh_020, vars: {airline_ICAO: TVF}, expected: Mogas }
+- { desh: *FuelChoiceDesh_020, vars: {airline_ICAO: KLC}, expected: Mogas }
+- { desh: *FuelChoiceDesh_020, vars: {airline_ICAO: KLH}, expected: Mogas }
+- { desh: *FuelChoiceDesh_020, vars: { airline_ICAO: RYR, airport_IATA: LON }, expected: AvGas }
+- { desh: *FuelChoiceDesh_020, vars: { airline_ICAO: RYR, airport_IATA: LHR }, expected: AvGas }
+- { desh: *FuelChoiceDesh_020, vars: { airline_ICAO: RYR, airport_IATA: LGW }, expected: AvGas }
+- { desh: *FuelChoiceDesh_020, vars: { airline_ICAO: RYR, airport_IATA: LCY }, expected: Mogas }
+- { desh: *FuelChoiceDesh_020, vars: { airline_ICAO: RYR, airport_IATA: STN }, expected: Mogas }
+- { desh: *FuelChoiceDesh_020, vars: { airline_ICAO: RYR, airport_IATA: LTN }, expected: Mogas }
+- { desh: *FuelChoiceDesh_020, vars: { airline_ICAO: RYR, airport_IATA: SEN }, expected: Mogas }
