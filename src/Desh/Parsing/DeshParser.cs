@@ -128,6 +128,19 @@ namespace Desh.Parsing
                 var variableScalar = reader.Expect<Scalar>();
                 switch (variableScalar.Value)
                 {
+                    case "anyIsTrue":
+                        throw new NotImplementedException("anyIsTrue");
+                        //var seq = reader.Peek<SequenceStart>();
+                        //if (seq != null)
+                        //{
+                        //    // OR list of Expression_AND_Mapping
+                        //    var expressionAndMappings = (Expression_AND_Mapping[])nestedObjectDeserializer(reader, typeof(Expression_AND_Mapping[]));
+                        //    value = new Expression_OR_List { ExpressionAndMappings = expressionAndMappings };
+                        //    return true;
+                        //}
+                        //pairs.Add();
+                        //thenBlock = (ExpressionBlock)nestedObjectDeserializer(reader, typeof(ExpressionBlock));
+                        //break;
                     case "then":
                         if (thenBlock != null)
                             throw new ParseException("Cannot have two THEN blocks");
