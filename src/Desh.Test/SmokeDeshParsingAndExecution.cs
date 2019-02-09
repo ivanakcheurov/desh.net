@@ -238,7 +238,7 @@ a:
         //        { ".equals", (varValue, allowedVariants) => allowedVariants.Any(variant => StringComparer.InvariantCultureIgnoreCase.Compare(varValue, variant) == 0) },
         //        { ".hasLength", (varValue, allowedLengths) => allowedLengths.Any(length => varValue.Length == int.Parse(length)) },
         //    };
-        //    var ops = new OperatorEvaluator(opDic);
+        //    var ops = new LambdaOperatorEvaluator(opDic);
         //    var engine = new Engine(vars, ops, true);
         //    var result = engine.Execute(ast);
             

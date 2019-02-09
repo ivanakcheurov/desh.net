@@ -2,7 +2,7 @@
 {
     public abstract class Comparator : Node
     {
-        public Comparator(string deshSpan) : base(deshSpan)
+        public Comparator(string sourceDesh, string sourceDeshLocation) : base(sourceDesh, sourceDeshLocation)
         {
         }
     }

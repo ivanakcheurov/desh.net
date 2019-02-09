@@ -7,11 +7,11 @@ namespace Desh.Parsing.Ast
     public class Operator_AND_Mapping : Comparator
     {
         [Obsolete("Should only be used by deserializers", true)]
-        public Operator_AND_Mapping() : base(null)
+        public Operator_AND_Mapping() : base(null, null)
         {
         }
 
-        public Operator_AND_Mapping(Operator[] operators, ExpressionBlock thenExpressionBlock, DecisionLeaf decision, string deshSpan) : base(deshSpan)
+        public Operator_AND_Mapping(Operator[] operators, ExpressionBlock thenExpressionBlock, DecisionLeaf decision, string sourceDesh, string sourceDeshLocation) : base(sourceDesh, sourceDeshLocation)
         {
             if (operators == null || operators.Any() == false)
                 throw new ArgumentException("Must contain at least 1 operator", nameof(operators));

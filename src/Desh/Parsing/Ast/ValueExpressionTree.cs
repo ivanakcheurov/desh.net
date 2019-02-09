@@ -5,11 +5,11 @@ namespace Desh.Parsing.Ast
     public class ValueExpressionTree : Comparator
     {
         [Obsolete("Should only be used by deserializers", true)]
-        public ValueExpressionTree() : base(null)
+        public ValueExpressionTree() : base(null, null)
         {
         }
 
-        public ValueExpressionTree(string deshSpan) : base(deshSpan)
+        public ValueExpressionTree(string sourceDesh, string sourceDeshLocation) : base(sourceDesh, sourceDeshLocation)
         {
         }
 

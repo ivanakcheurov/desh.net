@@ -105,12 +105,12 @@ namespace Desh.Execution
                 case Operator_AND_Mapping mapping:
                     return Execute(variableValue, mapping);
                 case ScalarValue scalar:
-                    var res = EvaluateOperator(variableValue, ".equals", new[] { scalar.Value }, scalar.DeshSpan);
+                    var res = EvaluateOperator(variableValue, ".equals", new[] { scalar.Value }, scalar.SourceDeshLocation);
                     if (res)
                         return MarkAsPositive(scalar);
                     return null;
                 case UnaryOperator op: // only unary operator here
-                    var res2 = EvaluateOperator(variableValue, op.Name, null, op.DeshSpan);
+                    var res2 = EvaluateOperator(variableValue, op.Name, null, op.SourceDeshLocation);
                     if (res2)
                         return MarkAsPositive(op);
                     return null;
@@ -124,7 +124,7 @@ namespace Desh.Execution
         {
             foreach (var scalarValue in valueExpressionTree.ScalarValues)
             {
-                var match = EvaluateOperator(variableValue, ".equals", new []{ scalarValue.Value }, scalarValue.DeshSpan);
+                var match = EvaluateOperator(variableValue, ".equals", new []{ scalarValue.Value }, scalarValue.SourceDeshLocation);
                 if (match)
                 {
                     return Execute(valueExpressionTree.ThenExpressionBlock);
@@ -138,7 +138,7 @@ namespace Desh.Execution
             foreach (var @operator in operatorAndMapping.Operators)
             {
                 
-                var match = EvaluateOperator(variableValue, @operator.Name, @operator.Arguments, @operator.DeshSpan);
+                var match = EvaluateOperator(variableValue, @operator.Name, @operator.Arguments, @operator.SourceDeshLocation);
                 if (match == false)
                 {
                     return null;
@@ -174,7 +174,7 @@ namespace Desh.Execution
             {
                 Number = _currentExecutionLogStepNumber++,
                 Timestamp = DateTime.UtcNow,
-                DeshSpan = variable.DeshSpan,
+                DeshSpan = variable.SourceDeshLocation,
                 SourceLocation = $"{callerFilePath}:{callerLineNumber}",
                 Type = StepType.ExpandVariable,
                 VariableName = variable.Name,
@@ -237,7 +237,7 @@ namespace Desh.Execution
             {
                 Number = _currentExecutionLogStepNumber++,
                 Timestamp = DateTime.UtcNow,
-                DeshSpan = decision.DeshSpan,
+                DeshSpan = decision.SourceDeshLocation,
                 SourceLocation = $"{callerFilePath}:{callerLineNumber}",
                 Type = StepType.MakeConclusion,
                 Decision = decision.Decision,
@@ -255,7 +255,7 @@ namespace Desh.Execution
             {
                 Number = _currentExecutionLogStepNumber++,
                 Timestamp = DateTime.UtcNow,
-                DeshSpan = node.DeshSpan,
+                DeshSpan = node.SourceDeshLocation,
                 SourceLocation = $"{callerFilePath}:{callerLineNumber}",
                 Type = StepType.MarkAsPositive,
             };

@@ -6,11 +6,13 @@ namespace Desh.Parsing.Ast
 {
     public abstract class Node
     {
-        public string DeshSpan { get; set; }
+        public string SourceDesh { get; set; }
+        public string SourceDeshLocation { get; set; }
 
-        public Node(string deshSpan)
+        public Node(string sourceDesh, string sourceDeshLocation)
         {
-            DeshSpan = deshSpan;
+            SourceDesh = sourceDesh;
+            SourceDeshLocation = sourceDeshLocation;
         }
     }
 }

@@ -2,13 +2,12 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Reflection;
 using System.Security.Cryptography;
 using System.Text;
 using Desh.Execution;
 using Desh.Execution.Logging;
 
-namespace Desh.Test
+namespace Desh.OutOfTheBox
 {
     public class ExecutionLogger : IExecutionLogger
     {

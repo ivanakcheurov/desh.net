@@ -1,4 +1,4 @@
 ﻿namespace Desh.Execution
 {
-    public class EvaluationResult { }
+    public abstract class EvaluationResult { }
 }

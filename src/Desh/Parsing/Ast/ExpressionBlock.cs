@@ -5,11 +5,11 @@ namespace Desh.Parsing.Ast
     public class ExpressionBlock : Node
     {
         [Obsolete("Should only be used by deserializers", true)]
-        public ExpressionBlock() : base(null)
+        public ExpressionBlock() : base(null, null)
         {
         }
 
-        public ExpressionBlock(string deshSpan) : base(deshSpan)
+        public ExpressionBlock(string sourceDesh, string sourceDeshLocation) : base(sourceDesh, sourceDeshLocation)
         {
         }
     }

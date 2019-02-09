@@ -1,19 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using Desh.Parsing;
+﻿using Desh.Parsing;
 
-namespace Desh.Test
+namespace Desh.OutOfTheBox
 {
     public class Context : IContext
     {
-        public Context(IParseLogger logger, INameRecognizer variableRecognizer, INameRecognizer operatorRecognizer)
+        public Context(string sourceDesh, IParseLogger logger, INameRecognizer variableRecognizer, INameRecognizer operatorRecognizer)
         {
+            SourceDesh = sourceDesh;
             Logger = logger;
             VariableRecognizer = variableRecognizer;
             OperatorRecognizer = operatorRecognizer;
         }
 
+        public string SourceDesh { get; }
         public IParseLogger Logger { get; }
         public INameRecognizer VariableRecognizer { get; }
         public INameRecognizer OperatorRecognizer { get; }

@@ -6,11 +6,11 @@ namespace Desh.Parsing.Ast
     public class Expression_AND_Mapping : ExpressionBlock
     {
         [Obsolete("Should only be used by deserializers", true)]
-        public Expression_AND_Mapping() : base(null)
+        public Expression_AND_Mapping() : base(null, null)
         {
         }
 
-        public Expression_AND_Mapping(string deshSpan) : base(deshSpan)
+        public Expression_AND_Mapping(string sourceDesh, string sourceDeshLocation) : base(sourceDesh, sourceDeshLocation)
         {
         }
 

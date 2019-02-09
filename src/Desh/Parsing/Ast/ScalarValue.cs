@@ -5,11 +5,11 @@ namespace Desh.Parsing.Ast
     public class ScalarValue : Comparator
     {
         [Obsolete("Should only be used by deserializers", true)]
-        public ScalarValue() : base(null)
+        public ScalarValue() : base(null, null)
         {
         }
 
-        public ScalarValue(string deshSpan) : base(deshSpan)
+        public ScalarValue(string sourceDesh, string sourceDeshLocation) : base(sourceDesh, sourceDeshLocation)
         {
         }
 

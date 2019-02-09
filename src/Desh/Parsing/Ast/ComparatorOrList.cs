@@ -5,11 +5,11 @@ namespace Desh.Parsing.Ast
     public class ComparatorOrList : Comparator
     {
         [Obsolete("Should only be used by deserializers", true)]
-        public ComparatorOrList() : base(null)
+        public ComparatorOrList() : base(null, null)
         {
         }
 
-        public ComparatorOrList(string deshSpan) : base(deshSpan)
+        public ComparatorOrList(string sourceDesh, string sourceDeshLocation) : base(sourceDesh, sourceDeshLocation)
         {
         }
 

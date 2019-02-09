@@ -5,11 +5,11 @@ namespace Desh.Parsing.Ast
     public class Operator : Node
     {
         [Obsolete("Should only be used by deserializers", true)]
-        public Operator() : base(null)
+        public Operator() : base(null, null)
         {
         }
 
-        public Operator(string deshSpan) : base(deshSpan)
+        public Operator(string sourceDesh, string sourceDeshLocation) : base(sourceDesh, sourceDeshLocation)
         {
         }
 

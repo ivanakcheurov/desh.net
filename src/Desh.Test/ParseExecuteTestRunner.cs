@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Text;
 using Desh.Execution;
+using Desh.OutOfTheBox;
 using Desh.Parsing;
 using Desh.Parsing.Ast;
 using Newtonsoft.Json;
@@ -20,50 +22,20 @@ namespace Desh.Test
         }
         public static void AssertPicksCorrectDecision(string name, TestCaseSource source, string desh, Dictionary<string, string> vars, string expectedDecision)
         {
-            var parser = new DeshParser();
+            var facade = new DeshFacade();
+            var actualDecision =
+                facade.ParseAndMakeStringDecision(desh,
+                    vars.ToImmutableDictionary(kvp => kvp.Key, kvp => new Func<string>(() => kvp.Value)),
+                    null);
 
-
-            var varsEv = new SmokeDeshParsingAndExecution.VariableEvaluator(vars);
-            var opDic = new Dictionary<string, Func<string, string[], bool>>
-            {
-                { ".equals", Equal },
-                { "notEquals", (varValue, allowedLengths) => !Equal(varValue, allowedLengths) },
-                { ".hasLength", (varValue, allowedLengths) => allowedLengths.Any(length => varValue.Length == int.Parse(length)) },
-                { ".between", IsBetween },
-                { "isBetween", IsBetween },
-                { "numberBetween", NumberBetween },
-                { "equalsAny", Equal },
-                { "contains", Contains },
-            };
-            var ops = new SmokeDeshParsingAndExecution.OperatorEvaluator(opDic);
-            var parseLogger = new ParseLogger();
-            var ctx = new Context(parseLogger, varsEv, ops);
-            var ast = parser.Parse(desh, ctx);
-            var astJson = JsonConvert.SerializeObject(ast);
-            var serializerBuilder = new SerializerBuilder();
-            var nodeTypes = (from domainAssembly in AppDomain.CurrentDomain.GetAssemblies()
-                from assemblyType in domainAssembly.GetTypes()
-                where typeof(Node).IsAssignableFrom(assemblyType)
-                select assemblyType).ToArray();
-            foreach (var nodeType in nodeTypes)
-            {
-                serializerBuilder.WithTagMapping($"!{nodeType.Name}", nodeType);
-            }
-            var serializer = serializerBuilder.EnsureRoundtrip().Build();
-            var astYaml = serializer.Serialize(ast);
-
-            var executionLogger = new ExecutionLogger();
-            var engine = new Engine(varsEv, ops, executionLogger, true);
-            executionLogger.Initialize(desh, engine);
-            var result = engine.Execute(ast);
-            var executionLogYaml = new SerializerBuilder().Build().Serialize(executionLogger.GetLog());
+            
             if (expectedDecision == null)
             {
-                Assert.Null(result);
+                Assert.Null(actualDecision);
             }
             else
             {
-                Assert.Equal(expectedDecision, Assert.Single(Assert.IsType<Conclusion>(result).Decisions));
+                Assert.Equal(expectedDecision, actualDecision);
             }
         }
 

@@ -1,9 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Text;
 using Desh.Parsing;
 
-namespace Desh.Test
+namespace Desh.OutOfTheBox
 {
     public class ParseLogger : IParseLogger
     {

@@ -52,6 +52,7 @@ namespace Desh.Parsing
     public abstract class NodeDeserializer<T> : INodeDeserializer
     {
         public IContext Ctx { get; }
+        public string SourceDesh => Ctx.SourceDesh;
 
         public string ClassName => GetType().Name;
 
@@ -97,7 +98,7 @@ namespace Desh.Parsing
                 // OR list of Expression_AND_Mapping
                 var expressionAndMappings = (Expression_AND_Mapping[])nestedObjectDeserializer(reader, typeof(Expression_AND_Mapping[]));
                 // todo: probably seq doesn't cover the whole list (but only a couple of characters in the beginning)
-                value = new Expression_OR_List(seq.ToDeshSpan()) { ExpressionAndMappings = expressionAndMappings };
+                value = new Expression_OR_List(SourceDesh, seq.ToDeshSpan()) { ExpressionAndMappings = expressionAndMappings };
                 return true;
             }
 
@@ -159,7 +160,7 @@ namespace Desh.Parsing
                             throw new ParseException("Cannot have more pairs after a DECIDE block in one Expression_AND_Mapping");
                         if (thenBlock != null)
                             throw new ParseException("Cannot have more pairs after a THEN block in one Expression_AND_Mapping");
-                        var variable = new Variable(variableScalar.ToDeshSpan()) {Name = variableScalar.Value}; /*.TrimEnd('?')*/
+                        var variable = new Variable(SourceDesh, variableScalar.ToDeshSpan()) {Name = variableScalar.Value}; /*.TrimEnd('?')*/
                         var comparator = (Comparator)nestedObjectDeserializer(reader, typeof(Comparator));
                         pairs.Add(variable, comparator);
                         break;
@@ -168,7 +169,7 @@ namespace Desh.Parsing
             } while ((end = reader.Allow<MappingEnd>()) == null);
 
             //var check = new Check(variableName, comparators);
-            value = new Expression_AND_Mapping(Extensions.ToDeshSpan(map, end)) { NormalPairs = pairs, ThenExpressionBlock = thenBlock, DecisionLeaf = decision };
+            value = new Expression_AND_Mapping(SourceDesh, Extensions.ToDeshSpan(map, end)) { NormalPairs = pairs, ThenExpressionBlock = thenBlock, DecisionLeaf = decision };
             return true;
         }
         public Expression_AND_Mapping_Deserializer(IContext ctx) : base(ctx) { }
@@ -193,7 +194,7 @@ namespace Desh.Parsing
                     // ReSharper disable once RedundantAssignment
                 } while ((endCond = reader.Allow<SequenceEnd>()) == null);
 
-                value = new ComparatorOrList (Extensions.ToDeshSpan(seq, endCond)) { Comparators = comparators.ToArray()};
+                value = new ComparatorOrList (SourceDesh, Extensions.ToDeshSpan(seq, endCond)) { Comparators = comparators.ToArray()};
                 return true;
             }
 
@@ -201,9 +202,9 @@ namespace Desh.Parsing
             if (scalar != null)
             {
                 if (Ctx.OperatorRecognizer.Recognize(scalar.Value))
-                    value = new UnaryOperator(scalar.ToDeshSpan()) { Name = scalar.Value };
+                    value = new UnaryOperator(SourceDesh, scalar.ToDeshSpan()) { Name = scalar.Value };
                 else
-                    value = new ScalarValue(scalar.ToDeshSpan()) { Value = scalar.Value };
+                    value = new ScalarValue(SourceDesh, scalar.ToDeshSpan()) { Value = scalar.Value };
                 return true;
             }
 
@@ -255,7 +256,7 @@ namespace Desh.Parsing
                 }
             } while ((end = reader.Peek<MappingEnd>()) == null);
 
-            value = new Operator_AND_Mapping(operators.ToArray(), thenBlock, decision, Extensions.ToDeshSpan(_, end));
+            value = new Operator_AND_Mapping(operators.ToArray(), thenBlock, decision, SourceDesh, Extensions.ToDeshSpan(_, end));
             return true;
         }
         public Operator_AND_Mapping_Deserializer(IContext ctx) : base(ctx) { }
@@ -275,19 +276,19 @@ namespace Desh.Parsing
                 do
                 {
                     var scalar = reader.Expect<Scalar>();
-                    scalars.Add(new ScalarValue(scalar.ToDeshSpan()){Value = scalar.Value});
+                    scalars.Add(new ScalarValue(SourceDesh, scalar.ToDeshSpan()){Value = scalar.Value});
                 }
                 while ((seqEnd = reader.Allow<SequenceEnd>()) == null);
             }
             else
             {
                 var scalar = reader.Expect<Scalar>();
-                scalars.Add(new ScalarValue(scalar.ToDeshSpan()) { Value = scalar.Value });
+                scalars.Add(new ScalarValue(SourceDesh, scalar.ToDeshSpan()) { Value = scalar.Value });
             }
 
             var thenExpressionBlock = (ExpressionBlock)nestedObjectDeserializer(reader, typeof(ExpressionBlock));
             // todo: probably _ doesn't cover the whole list (but only a couple of characters in the beginning)
-            value = new ValueExpressionTree(_.ToDeshSpan()) { ScalarValues = scalars.ToArray(), ThenExpressionBlock = thenExpressionBlock };
+            value = new ValueExpressionTree(SourceDesh, _.ToDeshSpan()) { ScalarValues = scalars.ToArray(), ThenExpressionBlock = thenExpressionBlock };
             return true;
         }
         public ValueExpressionTreeDeserializer(IContext ctx) : base(ctx) { }
@@ -299,7 +300,7 @@ namespace Desh.Parsing
         {
             var _ = reader.Current.Start;
             var decisionScalar = reader.Expect<Scalar>();
-            value = new DecisionLeaf (decisionScalar.ToDeshSpan()) { Decision = decisionScalar.Value };
+            value = new DecisionLeaf (SourceDesh, decisionScalar.ToDeshSpan()) { Decision = decisionScalar.Value };
             return true;
         }
         public DecisionLeafDeserializer(IContext ctx) : base(ctx) { }
@@ -326,7 +327,7 @@ namespace Desh.Parsing
                     args = new[] { arg };
             }
             // todo: also cover the arguments and not just the name of the operator
-            value = new Operator(operatorNameScalar.ToDeshSpan()) { Name = operatorName, Arguments = args };
+            value = new Operator(SourceDesh, operatorNameScalar.ToDeshSpan()) { Name = operatorName, Arguments = args };
             return true;
         }
         public OperatorDeserializer(IContext ctx) : base(ctx) { }
