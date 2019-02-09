@@ -3,12 +3,17 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Desh.Execution;
+using Desh.OutOfTheBox;
 using Desh.Parsing;
 using Desh.Parsing.Ast;
 using YamlDotNet.Serialization;
 
-namespace Desh.OutOfTheBox
+// ReSharper disable once CheckNamespace
+namespace Desh
 {
+    /// <summary>
+    /// Makes parsing and executing desh simple
+    /// </summary>
     public class DeshFacade
     {
         /// <summary>

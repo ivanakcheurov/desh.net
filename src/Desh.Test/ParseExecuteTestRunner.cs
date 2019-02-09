@@ -1,15 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Linq;
-using System.Text;
-using Desh.Execution;
-using Desh.OutOfTheBox;
-using Desh.Parsing;
-using Desh.Parsing.Ast;
 using Newtonsoft.Json;
 using Xunit;
-using YamlDotNet.Serialization;
 
 namespace Desh.Test
 {
