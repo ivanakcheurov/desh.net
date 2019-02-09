@@ -38,27 +38,5 @@ namespace Desh.Test
                 Assert.Equal(expectedDecision, actualDecision);
             }
         }
-
-        private static bool Equal(string varValue, string[] allowedVariants)
-        {
-            return allowedVariants.Any(variant => StringComparer.InvariantCultureIgnoreCase.Compare(varValue, variant) == 0);
-        }
-        private static bool Contains(string varValue, string[] searchedSubstrings)
-        {
-            return searchedSubstrings.Any(variant => varValue.Contains(variant, StringComparison.InvariantCultureIgnoreCase));
-        }
-
-        private static bool IsBetween(string varValue, string[] maxMinRange)
-        {
-            return StringComparer.InvariantCultureIgnoreCase.Compare(varValue, maxMinRange[0]) >= 0 && StringComparer.InvariantCultureIgnoreCase.Compare(varValue, maxMinRange[1]) <= 0;
-        }
-
-        private static bool NumberBetween(string varValue, string[] minMaxRange)
-        {
-            decimal varDecimal = decimal.Parse(varValue);
-            decimal minDecimal = decimal.Parse(minMaxRange[0]);
-            decimal maxDecimal = decimal.Parse(minMaxRange[1]);
-            return minDecimal <= varDecimal && varDecimal <= maxDecimal;
-        }
     }
 }
