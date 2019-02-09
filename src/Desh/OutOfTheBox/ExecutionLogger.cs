@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Reflection;
 using System.Security.Cryptography;
 using System.Text;
 using Desh.Execution;
@@ -28,12 +29,15 @@ namespace Desh.OutOfTheBox
         public void Initialize(string desh, Engine engine)
         {
             //string assemblyVersion = Assembly.GetExecutingAssembly().GetName().Version.ToString();
-            // beware: this makes IO to disk.
-            string fileVersion = FileVersionInfo.GetVersionInfo(engine.GetType().Assembly.Location).FileVersion;
-            //string productVersion = FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location).ProductVersion;
+            //string fileVersion = FileVersionInfo.GetVersionInfo(engine.GetType().Assembly.Location).FileVersion;
+            //string productVersion = FileVersionInfo.GetVersionInfo(engine.GetType().Assembly.Location).ProductVersion;
+            string productVersion = ((AssemblyInformationalVersionAttribute)Assembly
+                    .GetAssembly(engine.GetType())
+                    .GetCustomAttributes(typeof(AssemblyInformationalVersionAttribute), false)[0])
+                .InformationalVersion;
             _log.Desh = desh;
             _log.DeshMd5 = GetMd5(desh);
-            _log.EngineVersion = fileVersion;
+            _log.EngineVersion = productVersion;
         }
 
         public void AddStep(Step step)
