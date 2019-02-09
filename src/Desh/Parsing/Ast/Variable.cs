@@ -1,19 +1,20 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Text;
 
 namespace Desh.Parsing.Ast
 {
-    public class Operator : Node
+    public class Variable : Node
     {
         [Obsolete("Should only be used by deserializers", true)]
-        public Operator() : base(null)
+        public Variable() : base(null)
         {
         }
 
-        public Operator(string deshSpan) : base(deshSpan)
+        public Variable(string deshSpan) : base(deshSpan)
         {
         }
 
         public string Name { get; set; }
-        public string[] Arguments { get; set; }
     }
 }

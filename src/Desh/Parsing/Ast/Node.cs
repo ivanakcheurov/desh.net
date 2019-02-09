@@ -4,7 +4,13 @@ using System.Text;
 
 namespace Desh.Parsing.Ast
 {
-    public class Node
+    public abstract class Node
     {
+        public string DeshSpan { get; set; }
+
+        public Node(string deshSpan)
+        {
+            DeshSpan = deshSpan;
+        }
     }
 }

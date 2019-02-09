@@ -6,11 +6,12 @@ namespace Desh.Parsing.Ast
     // ReSharper disable once InconsistentNaming
     public class Operator_AND_Mapping : Comparator
     {
-        public Operator_AND_Mapping()
+        [Obsolete("Should only be used by deserializers", true)]
+        public Operator_AND_Mapping() : base(null)
         {
         }
 
-        public Operator_AND_Mapping(Operator[] operators, ExpressionBlock thenExpressionBlock, DecisionLeaf decision)
+        public Operator_AND_Mapping(Operator[] operators, ExpressionBlock thenExpressionBlock, DecisionLeaf decision, string deshSpan) : base(deshSpan)
         {
             if (operators == null || operators.Any() == false)
                 throw new ArgumentException("Must contain at least 1 operator", nameof(operators));

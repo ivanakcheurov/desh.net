@@ -1,16 +1,22 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace Desh.Parsing.Ast
 {
     public class Expression_AND_Mapping : ExpressionBlock
     {
-        public Expression_AND_Mapping()
+        [Obsolete("Should only be used by deserializers", true)]
+        public Expression_AND_Mapping() : base(null)
+        {
+        }
+
+        public Expression_AND_Mapping(string deshSpan) : base(deshSpan)
         {
         }
 
         // todo: any is true
         // todo: consider allowing inspecting the same variable multiple times
-        public Dictionary<string, Comparator> NormalPairs { get; set; }
+        public Dictionary<Variable, Comparator> NormalPairs { get; set; }
         public ExpressionBlock ThenExpressionBlock { get; set; }
         public DecisionLeaf DecisionLeaf { get; set; }
     }

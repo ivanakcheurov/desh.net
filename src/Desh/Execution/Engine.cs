@@ -1,4 +1,8 @@
-﻿using Desh.Parsing.Ast;
+﻿using System;
+using System.Runtime.CompilerServices;
+using Desh.Execution.Logging;
+using Desh.Parsing.Ast;
+#pragma warning disable 1591
 
 namespace Desh.Execution
 {
@@ -6,12 +10,15 @@ namespace Desh.Execution
     {
         private readonly IVariableEvaluator _variableEvaluator;
         private readonly IOperatorEvaluator _operatorEvaluator;
+        private readonly IExecutionLogger _executionLogger;
         private bool _stopOnFirstAcceptedDecision;
+        private int _currentExecutionLogStepNumber = 1;
 
-        public Engine(IVariableEvaluator variableEvaluator, IOperatorEvaluator operatorEvaluator, bool stopOnFirstAcceptedDecision)
+        public Engine(IVariableEvaluator variableEvaluator, IOperatorEvaluator operatorEvaluator, IExecutionLogger executionLogger, bool stopOnFirstAcceptedDecision)
         {
             _variableEvaluator = variableEvaluator;
             _operatorEvaluator = operatorEvaluator;
+            _executionLogger = executionLogger;
             _stopOnFirstAcceptedDecision = stopOnFirstAcceptedDecision;
         }
 
@@ -20,7 +27,7 @@ namespace Desh.Execution
             switch (expressionBlock)
             {
                 case DecisionLeaf decision:
-                    return new Conclusion(new[] {decision.Decision});
+                    return MakeConclusion(decision);
                 case Expression_OR_List list:
                     foreach (var expressionAndMapping in list.ExpressionAndMappings)
                     {
@@ -47,7 +54,7 @@ namespace Desh.Execution
             {
                 // todo: anyIsTrue
                 var variable = expressionPair.Key;
-                var variableValue = _variableEvaluator.Evaluate(variable);
+                var variableValue = EvaluateVariable(variable);
                 var comparator = expressionPair.Value;
                 var result = Execute(variableValue, comparator);
                 switch (result)
@@ -71,8 +78,8 @@ namespace Desh.Execution
                 }
             }
             if (expressionAndMapping.DecisionLeaf != null)
-                return new Conclusion(new[]{expressionAndMapping.DecisionLeaf.Decision});
-            return new PositiveEval();
+                return MakeConclusion(expressionAndMapping.DecisionLeaf);
+            return MarkAsPositive(expressionAndMapping);
         }
 
         public EvaluationResult Execute(string variableValue, Comparator comparator)
@@ -98,14 +105,14 @@ namespace Desh.Execution
                 case Operator_AND_Mapping mapping:
                     return Execute(variableValue, mapping);
                 case ScalarValue scalar:
-                    var res = _operatorEvaluator.Evaluate(variableValue, ".equals", new[] { scalar.Value });
+                    var res = EvaluateOperator(variableValue, ".equals", new[] { scalar.Value }, scalar.DeshSpan);
                     if (res)
-                        return new PositiveEval();
+                        return MarkAsPositive(scalar);
                     return null;
                 case UnaryOperator op: // only unary operator here
-                    var res2 = _operatorEvaluator.Evaluate(variableValue, op.Name, null);
+                    var res2 = EvaluateOperator(variableValue, op.Name, null, op.DeshSpan);
                     if (res2)
-                        return new PositiveEval();
+                        return MarkAsPositive(op);
                     return null;
 
                 default:
@@ -117,7 +124,7 @@ namespace Desh.Execution
         {
             foreach (var scalarValue in valueExpressionTree.ScalarValues)
             {
-                var match = _operatorEvaluator.Evaluate(variableValue, ".equals", new []{ scalarValue.Value });
+                var match = EvaluateOperator(variableValue, ".equals", new []{ scalarValue.Value }, scalarValue.DeshSpan);
                 if (match)
                 {
                     return Execute(valueExpressionTree.ThenExpressionBlock);
@@ -131,7 +138,7 @@ namespace Desh.Execution
             foreach (var @operator in operatorAndMapping.Operators)
             {
                 
-                var match = _operatorEvaluator.Evaluate(variableValue, @operator.Name, @operator.Arguments);
+                var match = EvaluateOperator(variableValue, @operator.Name, @operator.Arguments, @operator.DeshSpan);
                 if (match == false)
                 {
                     return null;
@@ -154,8 +161,105 @@ namespace Desh.Execution
 
             if (operatorAndMapping.Decision != null)
             {
-                return new Conclusion(new[] { operatorAndMapping.Decision.Decision });
+                return MakeConclusion(operatorAndMapping.Decision);
             }
+            return MarkAsPositive(operatorAndMapping);
+        }
+
+        private string EvaluateVariable(Variable variable,
+            [CallerFilePath] string callerFilePath = null, [CallerLineNumber] int callerLineNumber = 0,
+            [CallerMemberName] string callerMemberName = null)
+        {
+            var step = new Step
+            {
+                Number = _currentExecutionLogStepNumber++,
+                Timestamp = DateTime.UtcNow,
+                DeshSpan = variable.DeshSpan,
+                SourceLocation = $"{callerFilePath}:{callerLineNumber}",
+                Type = StepType.ExpandVariable,
+                VariableName = variable.Name,
+            };
+            try
+            {
+                var variableValue = _variableEvaluator.Evaluate(variable.Name);
+                step.VariableValue = variableValue;
+                return variableValue;
+            }
+            catch (Exception e)
+            {
+                step.Exception = e.ToString();
+                throw;
+            }
+            finally
+            {
+                _executionLogger.AddStep(step);
+            }
+        }
+
+        private bool EvaluateOperator(string variableValue, string operatorName, string[] arguments,
+            string deshSpan,
+            [CallerFilePath] string callerFilePath = null, [CallerLineNumber] int callerLineNumber = 0,
+            [CallerMemberName] string callerMemberName = null)
+        {
+            var step = new Step
+            {
+                Number = _currentExecutionLogStepNumber++,
+                Timestamp = DateTime.UtcNow,
+                DeshSpan = deshSpan,
+                SourceLocation = $"{callerFilePath}:{callerLineNumber}",
+                Type = StepType.EvaluateOperator,
+                OperatorName = operatorName,
+                OperatorVariableValue = variableValue,
+                OperatorArguments = arguments,
+            };
+            try
+            {
+                var result = _operatorEvaluator.Evaluate(variableValue, operatorName, arguments);
+                step.OperatorResult = result;
+                return result;
+            }
+            catch (Exception e)
+            {
+                step.Exception = e.ToString();
+                throw;
+            }
+            finally
+            {
+                _executionLogger.AddStep(step);
+            }
+        }
+
+        private Conclusion MakeConclusion(DecisionLeaf decision,
+            [CallerFilePath] string callerFilePath = null, [CallerLineNumber] int callerLineNumber = 0,
+            [CallerMemberName] string callerMemberName = null)
+        {
+            var step = new Step
+            {
+                Number = _currentExecutionLogStepNumber++,
+                Timestamp = DateTime.UtcNow,
+                DeshSpan = decision.DeshSpan,
+                SourceLocation = $"{callerFilePath}:{callerLineNumber}",
+                Type = StepType.MakeConclusion,
+                Decision = decision.Decision,
+            };
+            _executionLogger.AddStep(step);
+            var result = new Conclusion(new []{decision.Decision});
+            return result;
+        }
+
+        private PositiveEval MarkAsPositive(Node node,
+            [CallerFilePath] string callerFilePath = null, [CallerLineNumber] int callerLineNumber = 0,
+            [CallerMemberName] string callerMemberName = null)
+        {
+            var step = new Step
+            {
+                Number = _currentExecutionLogStepNumber++,
+                Timestamp = DateTime.UtcNow,
+                DeshSpan = node.DeshSpan,
+                SourceLocation = $"{callerFilePath}:{callerLineNumber}",
+                Type = StepType.MarkAsPositive,
+            };
+            _executionLogger.AddStep(step);
             return new PositiveEval();
         }
     }

@@ -1,8 +1,15 @@
-﻿namespace Desh.Parsing.Ast
+﻿using System;
+
+namespace Desh.Parsing.Ast
 {
     public class Expression_OR_List : ExpressionBlock
     {
-        public Expression_OR_List()
+        [Obsolete("Should only be used by deserializers", true)]
+        public Expression_OR_List() : base(null)
+        {
+        }
+
+        public Expression_OR_List(string deshSpan) : base(deshSpan)
         {
         }
 

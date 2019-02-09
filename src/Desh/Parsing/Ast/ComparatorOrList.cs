@@ -1,8 +1,15 @@
-﻿namespace Desh.Parsing.Ast
+﻿using System;
+
+namespace Desh.Parsing.Ast
 {
     public class ComparatorOrList : Comparator
     {
-        public ComparatorOrList()
+        [Obsolete("Should only be used by deserializers", true)]
+        public ComparatorOrList() : base(null)
+        {
+        }
+
+        public ComparatorOrList(string deshSpan) : base(deshSpan)
         {
         }
 

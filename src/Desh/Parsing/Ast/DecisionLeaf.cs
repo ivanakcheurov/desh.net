@@ -1,8 +1,15 @@
-﻿namespace Desh.Parsing.Ast
+﻿using System;
+
+namespace Desh.Parsing.Ast
 {
     public class DecisionLeaf : ExpressionBlock
     {
-        public DecisionLeaf()
+        [Obsolete("Should only be used by deserializers", true)]
+        public DecisionLeaf() : base(null)
+        {
+        }
+
+        public DecisionLeaf(string deshSpan) : base(deshSpan)
         {
         }
 

@@ -52,8 +52,11 @@ namespace Desh.Test
             var serializer = serializerBuilder.EnsureRoundtrip().Build();
             var astYaml = serializer.Serialize(ast);
 
-            var engine = new Engine(varsEv, ops, true);
+            var executionLogger = new ExecutionLogger();
+            var engine = new Engine(varsEv, ops, executionLogger, true);
+            executionLogger.Initialize(desh, engine);
             var result = engine.Execute(ast);
+            var executionLogYaml = new SerializerBuilder().Build().Serialize(executionLogger.GetLog());
             if (expectedDecision == null)
             {
                 Assert.Null(result);

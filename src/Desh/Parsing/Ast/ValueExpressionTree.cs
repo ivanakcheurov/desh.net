@@ -1,8 +1,15 @@
-﻿namespace Desh.Parsing.Ast
+﻿using System;
+
+namespace Desh.Parsing.Ast
 {
     public class ValueExpressionTree : Comparator
     {
-        public ValueExpressionTree()
+        [Obsolete("Should only be used by deserializers", true)]
+        public ValueExpressionTree() : base(null)
+        {
+        }
+
+        public ValueExpressionTree(string deshSpan) : base(deshSpan)
         {
         }
 

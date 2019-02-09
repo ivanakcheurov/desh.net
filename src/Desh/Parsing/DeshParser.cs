@@ -7,6 +7,7 @@ using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
+#pragma warning disable 1591
 
 namespace Desh.Parsing
 {
@@ -36,7 +37,7 @@ namespace Desh.Parsing
             //Dictionary<string, string[]> map;
             using (var reader = new StringReader(desh))
             {
-                var eventReader = new YamlDotNet.Core.Parser(reader);
+                var eventReader = new Parser(reader);
                 // Consume the stream start event "manually"
                 // https://stackoverflow.com/questions/27490434/does-yamldotnet-library-support-the-document-separator
                 eventReader.Expect<StreamStart>();
@@ -52,7 +53,7 @@ namespace Desh.Parsing
     {
         public IContext Ctx { get; }
 
-        public string ClassName => this.GetType().Name;
+        public string ClassName => GetType().Name;
 
         protected void LogStart(YamlDotNet.Core.IParser reader) => Ctx.Logger.LogStart(ClassName, null, reader.Current.Start.Line, reader.Current.Start.Column);
         protected void LogEnd(YamlDotNet.Core.IParser reader) => Ctx.Logger.LogEnd(ClassName, null, reader.Current.End.Line, reader.Current.End.Column);
@@ -89,13 +90,14 @@ namespace Desh.Parsing
 
         public override bool Deserialize(YamlDotNet.Core.IParser reader, Func<YamlDotNet.Core.IParser, Type, object> nestedObjectDeserializer, out ExpressionBlock value)
         {
-            var start = reader.Current.Start;
+            var _ = reader.Current.Start;
             var seq = reader.Peek<SequenceStart>();
             if (seq != null)
             {
                 // OR list of Expression_AND_Mapping
                 var expressionAndMappings = (Expression_AND_Mapping[])nestedObjectDeserializer(reader, typeof(Expression_AND_Mapping[]));
-                value = new Expression_OR_List { ExpressionAndMappings = expressionAndMappings };
+                // todo: probably seq doesn't cover the whole list (but only a couple of characters in the beginning)
+                value = new Expression_OR_List(seq.ToDeshSpan()) { ExpressionAndMappings = expressionAndMappings };
                 return true;
             }
 
@@ -116,13 +118,14 @@ namespace Desh.Parsing
     {
         public override bool Deserialize(YamlDotNet.Core.IParser reader, Func<YamlDotNet.Core.IParser, Type, object> nestedObjectDeserializer, out Expression_AND_Mapping value)
         {
-            var start = reader.Current.Start;
+            var _ = reader.Current.Start;
             // ReSharper disable once UnusedVariable, used for debugging purposes
             var map = reader.Expect<MappingStart>();
 
-            var pairs = new Dictionary<string, Comparator>();
+            var pairs = new Dictionary<Variable, Comparator>();
             ExpressionBlock thenBlock = null;
             DecisionLeaf decision = null;
+            MappingEnd end;
             do
             {
                 var variableScalar = reader.Expect<Scalar>();
@@ -156,16 +159,16 @@ namespace Desh.Parsing
                             throw new ParseException("Cannot have more pairs after a DECIDE block in one Expression_AND_Mapping");
                         if (thenBlock != null)
                             throw new ParseException("Cannot have more pairs after a THEN block in one Expression_AND_Mapping");
-                        var variable = variableScalar.Value /*.TrimEnd('?')*/;
+                        var variable = new Variable(variableScalar.ToDeshSpan()) {Name = variableScalar.Value}; /*.TrimEnd('?')*/
                         var comparator = (Comparator)nestedObjectDeserializer(reader, typeof(Comparator));
                         pairs.Add(variable, comparator);
                         break;
                 }
 
-            } while (reader.Allow<MappingEnd>() == null);
+            } while ((end = reader.Allow<MappingEnd>()) == null);
 
             //var check = new Check(variableName, comparators);
-            value = new Expression_AND_Mapping { NormalPairs = pairs, ThenExpressionBlock = thenBlock, DecisionLeaf = decision };
+            value = new Expression_AND_Mapping(Extensions.ToDeshSpan(map, end)) { NormalPairs = pairs, ThenExpressionBlock = thenBlock, DecisionLeaf = decision };
             return true;
         }
         public Expression_AND_Mapping_Deserializer(IContext ctx) : base(ctx) { }
@@ -175,14 +178,14 @@ namespace Desh.Parsing
     {
         public override bool Deserialize(YamlDotNet.Core.IParser reader, Func<YamlDotNet.Core.IParser, Type, object> nestedObjectDeserializer, out Comparator value)
         {
-            var start = reader.Current.Start;
+            var _ = reader.Current.Start;
             var seq = reader.Allow<SequenceStart>();
             if (seq != null)
             {
                 // OR list of Expression_AND_Mapping
                 var comparators = new List<Comparator>();
                 // ReSharper disable once NotAccessedVariable
-                object endCond = null;
+                SequenceEnd endCond;
                 do
                 {
                     var comp = (Comparator)nestedObjectDeserializer(reader, typeof(Comparator));
@@ -190,7 +193,7 @@ namespace Desh.Parsing
                     // ReSharper disable once RedundantAssignment
                 } while ((endCond = reader.Allow<SequenceEnd>()) == null);
 
-                value = new ComparatorOrList() { Comparators = comparators.ToArray() };
+                value = new ComparatorOrList (Extensions.ToDeshSpan(seq, endCond)) { Comparators = comparators.ToArray()};
                 return true;
             }
 
@@ -198,20 +201,20 @@ namespace Desh.Parsing
             if (scalar != null)
             {
                 if (Ctx.OperatorRecognizer.Recognize(scalar.Value))
-                    value = new UnaryOperator { Name = scalar.Value };
+                    value = new UnaryOperator(scalar.ToDeshSpan()) { Name = scalar.Value };
                 else
-                    value = new ScalarValue { Value = scalar.Value };
+                    value = new ScalarValue(scalar.ToDeshSpan()) { Value = scalar.Value };
                 return true;
             }
 
-            var map = reader.Expect<MappingStart>();
+            var unused = reader.Expect<MappingStart>();
             var variableOrOperatorScalar = reader.Peek<Scalar>();
             if (variableOrOperatorScalar?.Value != null && Ctx.OperatorRecognizer.Recognize(variableOrOperatorScalar.Value))
                 value = (Operator_AND_Mapping)nestedObjectDeserializer(reader, typeof(Operator_AND_Mapping));
             else
                 value = (ValueExpressionTree)nestedObjectDeserializer(reader, typeof(ValueExpressionTree));
 
-            var mapEnd = reader.Expect<MappingEnd>();
+            var unused1 = reader.Expect<MappingEnd>();
             return true;
         }
         public ComparatorDeserializer(IContext ctx) : base(ctx) { }
@@ -223,10 +226,11 @@ namespace Desh.Parsing
         public override bool Deserialize(YamlDotNet.Core.IParser reader, Func<YamlDotNet.Core.IParser, Type, object> nestedObjectDeserializer,
             out Operator_AND_Mapping value)
         {
-            var start = reader.Current.Start;
+            var _ = reader.Current;
             List<Operator> operators = new List<Operator>();
             DecisionLeaf decision = null;
             ExpressionBlock thenBlock = null;
+            MappingEnd end;
             do
             {
                 var scalar = reader.Peek<Scalar>();
@@ -235,13 +239,13 @@ namespace Desh.Parsing
                     case "then":
                         if (thenBlock != null)
                             throw new ParseException("Cannot have two THEN blocks");
-                        scalar = reader.Expect<Scalar>();
+                        var unused = reader.Expect<Scalar>();
                         thenBlock = (ExpressionBlock)nestedObjectDeserializer(reader, typeof(ExpressionBlock));
                         break;
                     case "decide":
                         if (decision != null)
                             throw new ParseException("Cannot have multiple DECIDE blocks");
-                        scalar = reader.Expect<Scalar>();
+                        var unused1 = reader.Expect<Scalar>();
                         decision = (DecisionLeaf)nestedObjectDeserializer(reader, typeof(DecisionLeaf));
                         break;
                     default:
@@ -249,9 +253,9 @@ namespace Desh.Parsing
                         operators.Add(@operator);
                         break;
                 }
-            } while (reader.Peek<MappingEnd>() == null);
+            } while ((end = reader.Peek<MappingEnd>()) == null);
 
-            value = new Operator_AND_Mapping(operators.ToArray(), thenBlock, decision);
+            value = new Operator_AND_Mapping(operators.ToArray(), thenBlock, decision, Extensions.ToDeshSpan(_, end));
             return true;
         }
         public Operator_AND_Mapping_Deserializer(IContext ctx) : base(ctx) { }
@@ -262,21 +266,28 @@ namespace Desh.Parsing
         public override bool Deserialize(YamlDotNet.Core.IParser reader, Func<YamlDotNet.Core.IParser, Type, object> nestedObjectDeserializer,
             out ValueExpressionTree value)
         {
-            var start = reader.Current.Start;
-            string[] strings = null;
-            var seq = reader.Peek<SequenceStart>();
+            var _ = reader.Current;
+            List<ScalarValue> scalars = new List<ScalarValue>();
+            var seq = reader.Allow<SequenceStart>();
             if (seq != null)
             {
-                strings = (string[])nestedObjectDeserializer(reader, typeof(string[]));
+                SequenceEnd seqEnd;
+                do
+                {
+                    var scalar = reader.Expect<Scalar>();
+                    scalars.Add(new ScalarValue(scalar.ToDeshSpan()){Value = scalar.Value});
+                }
+                while ((seqEnd = reader.Allow<SequenceEnd>()) == null);
             }
             else
             {
                 var scalar = reader.Expect<Scalar>();
-                strings = new[] { scalar.Value };
+                scalars.Add(new ScalarValue(scalar.ToDeshSpan()) { Value = scalar.Value });
             }
 
             var thenExpressionBlock = (ExpressionBlock)nestedObjectDeserializer(reader, typeof(ExpressionBlock));
-            value = new ValueExpressionTree { ScalarValues = strings.Select(s => new ScalarValue { Value = s }).ToArray(), ThenExpressionBlock = thenExpressionBlock };
+            // todo: probably _ doesn't cover the whole list (but only a couple of characters in the beginning)
+            value = new ValueExpressionTree(_.ToDeshSpan()) { ScalarValues = scalars.ToArray(), ThenExpressionBlock = thenExpressionBlock };
             return true;
         }
         public ValueExpressionTreeDeserializer(IContext ctx) : base(ctx) { }
@@ -286,8 +297,9 @@ namespace Desh.Parsing
     {
         public override bool Deserialize(YamlDotNet.Core.IParser reader, Func<YamlDotNet.Core.IParser, Type, object> nestedObjectDeserializer, out DecisionLeaf value)
         {
-            var start = reader.Current.Start;
-            value = new DecisionLeaf { Decision = reader.Expect<Scalar>().Value };
+            var _ = reader.Current.Start;
+            var decisionScalar = reader.Expect<Scalar>();
+            value = new DecisionLeaf (decisionScalar.ToDeshSpan()) { Decision = decisionScalar.Value };
             return true;
         }
         public DecisionLeafDeserializer(IContext ctx) : base(ctx) { }
@@ -297,9 +309,9 @@ namespace Desh.Parsing
     {
         public override bool Deserialize(YamlDotNet.Core.IParser reader, Func<YamlDotNet.Core.IParser, Type, object> nestedObjectDeserializer, out Operator value)
         {
-            var start = reader.Current.Start;
-            var scalar = reader.Expect<Scalar>();
-            var operatorName = scalar.Value;
+            var _ = reader.Current.Start;
+            var operatorNameScalar = reader.Expect<Scalar>();
+            var operatorName = operatorNameScalar.Value;
             if (Ctx.OperatorRecognizer.Recognize(operatorName) == false)
                 throw new ParseException("Must be an operator name");
             string[] args = null;
@@ -313,7 +325,8 @@ namespace Desh.Parsing
                 if (arg != null)
                     args = new[] { arg };
             }
-            value = new Operator { Name = operatorName, Arguments = args };
+            // todo: also cover the arguments and not just the name of the operator
+            value = new Operator(operatorNameScalar.ToDeshSpan()) { Name = operatorName, Arguments = args };
             return true;
         }
         public OperatorDeserializer(IContext ctx) : base(ctx) { }
