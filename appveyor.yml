@@ -7,19 +7,11 @@ version: 0.2.{build}
 # Do not build feature branch with open Pull Requests
 skip_branch_with_pr: true
 
-# Maximum number of concurrent jobs for the project
-max_jobs: 1
-
 image: Visual Studio 2017
 
-# Automatically register private account and/or project AppVeyor NuGet feeds.
-nuget:
-  account_feed: false
-  project_feed: false
-  #disable_publish_on_pr: true     # disable publishing of .nupkg artifacts to account/project feeds for pull request builds
-  #publish_wap_octopus: true       # disable publishing of Octopus Deploy .nupkg artifacts to account/project feeds
-
-platform: Any CPU
+install:
+  # to avoid a build error "project.assets.json not found"
+  - dotnet restore ./src
 
 # Build settings, not to be confused with "before_build" and "after_build".
 # "project" is relative to the original build directory and not influenced by directory changes in "before_build".
@@ -28,23 +20,14 @@ build:
   project: src/desh.net.sln       # path to Visual Studio solution or project
   publish_nuget: true             # package projects with .nuspec files and push to artifacts
   publish_nuget_symbols: true     # generate and publish NuGet symbol packages
-  include_nuget_references: true  # add -IncludeReferencedProjects option while packaging NuGet artifacts
 
   # MSBuild verbosity level
   verbosity: minimal
 
-
-artifacts:
-  - path: '**\*.nupkg'
-
 deploy:
   - provider: NuGet
-    server: https://my.nuget.server/feed
     api_key:
-      secure: qmebu+M8KkXGbIErYy6dT6E7F7iSkbY73aJF6IdCbaD9zgFI5StHMtTjnwth4Zfp
-    skip_symbols: false
-    symbol_server: https://your.symbol.server/feed
-    artifact: desh.net.nupkg
+      secure: 288F17vf7HPuG0042uglA9U5ajrwSE4DcrakeO/CYGhqbLHHUpyvy/VVHy6P7JDl
 
 for:    
   -
