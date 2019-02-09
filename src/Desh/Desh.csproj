@@ -25,7 +25,7 @@ desh (Decision Expressions) is a concise language for defining business rules.</
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <DocumentationFile>D:\work\desh.net\src\Desh\desh.xml</DocumentationFile>
+    <DocumentationFile></DocumentationFile>
   </PropertyGroup>
 
   <ItemGroup>
