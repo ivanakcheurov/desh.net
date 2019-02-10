@@ -25,7 +25,7 @@ namespace Desh
         /// <returns>a single string decision obtained by executing business rules specified in desh</returns>
         public string ParseAndMakeStringDecision(string desh,
             IReadOnlyDictionary<string, Func<string>> variableEvaluations,
-            IReadOnlyDictionary<string, Func<string, string[], bool>> customOperatorEvaluations)
+            IReadOnlyDictionary<string, Func<string, string[], bool>> customOperatorEvaluations = null)
         {
             return ParseAndMakeStringDecision(desh, variableEvaluations, customOperatorEvaluations, out string parseLog,
                 out string abstractSyntaxTreeYaml, out string executionLogYaml);
