@@ -14,6 +14,7 @@ Just install the [Desh NuGet package](https://www.nuget.org/packages/desh/):
 PM> Install-Package YamlDotNet
 ```
 Craft a Desh document (YAML).
+
 Let's take an example of an online travel agency. Customers want to know if they need a visa when traveling to another country.
 
 The following Desh document describes business rules if a person needs a visa:
