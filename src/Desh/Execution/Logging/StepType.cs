@@ -11,5 +11,6 @@ namespace Desh.Execution.Logging
         EvaluateOperator = 2,
         MakeConclusion = 3,
         MarkAsPositive = 4,
+        ReturnExpressionResult = 5,
     }
 }

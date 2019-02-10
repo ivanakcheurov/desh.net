@@ -22,6 +22,7 @@ namespace Desh.Execution.Logging
         public bool? OperatorResult { get; set; }
 
         public string Decision { get; set; }
+        public string Result { get; set; }
         public string SourceLocation { get; set; }
     }
 }

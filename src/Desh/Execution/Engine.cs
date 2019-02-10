@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using Desh.Execution.Logging;
 using Desh.Parsing.Ast;
@@ -27,7 +28,7 @@ namespace Desh.Execution
             switch (expressionBlock)
             {
                 case DecisionLeaf decision:
-                    return MakeConclusion(decision);
+                    return LogReturn(MakeConclusion(decision));
                 case Expression_OR_List list:
                     foreach (var expressionAndMapping in list.ExpressionAndMappings)
                     {
@@ -35,15 +36,15 @@ namespace Desh.Execution
                         switch (result)
                         {
                             case null: break; // just continue to the next node
-                            case Conclusion conclusion: return conclusion; // todo: implement stopOnFirst = false
+                            case Conclusion conclusion: return LogReturn(conclusion); // todo: implement stopOnFirst = false
                             // todo: consider what to do if expressionAndMapping (that contain decisions) are mixed with pure bool expressionAndMapping (e.g. that have only comparisons with ScalarValue)
-                            case PositiveEval positive: return positive; 
+                            case PositiveEval positive: return LogReturn(positive); 
                             default: throw new ExecutionException("Unexpected result of type: " + result.GetType().FullName);
                         }
                     }
-                    return null;
+                    return LogReturn(null);
                 case Expression_AND_Mapping map:
-                    return Execute(map);
+                    return LogReturn(Execute(map));
                 default: throw new ExecutionException("Unexpected result of type: " + expressionBlock.GetType().FullName);
             }
         }
@@ -59,8 +60,8 @@ namespace Desh.Execution
                 var result = Execute(variableValue, comparator);
                 switch (result)
                 {
-                    case null: return null;
-                    case Conclusion conclusion: return conclusion; // todo: implement stopOnFirst = false
+                    case null: return LogReturn(null);
+                    case Conclusion conclusion: return LogReturn(conclusion); // todo: implement stopOnFirst = false
                     case PositiveEval _: break; // just continue to the next node
                     default: throw new ExecutionException("Unexpected result of type: " + result.GetType().FullName);
                 }
@@ -71,15 +72,15 @@ namespace Desh.Execution
                 var result = Execute(expressionAndMapping.ThenExpressionBlock);
                 switch (result) //todo: remove duplication
                 {
-                    case null: return null;
-                    case Conclusion conclusion: return conclusion; // todo: implement stopOnFirst = false
+                    case null: return LogReturn(null);
+                    case Conclusion conclusion: return LogReturn(conclusion); // todo: implement stopOnFirst = false
                     case PositiveEval _: break; // just continue to the next node
                     default: throw new ExecutionException("Unexpected result of type: " + result.GetType().FullName);
                 }
             }
             if (expressionAndMapping.DecisionLeaf != null)
-                return MakeConclusion(expressionAndMapping.DecisionLeaf);
-            return MarkAsPositive(expressionAndMapping);
+                return LogReturn(MakeConclusion(expressionAndMapping.DecisionLeaf));
+            return LogReturn(MarkAsPositive(expressionAndMapping));
         }
 
         public EvaluationResult Execute(string variableValue, Comparator comparator)
@@ -93,27 +94,27 @@ namespace Desh.Execution
                         switch(result)
                         {
                             case null: break; // just continue to the next node
-                            case Conclusion conclusion: return conclusion; // todo: implement stopOnFirst = false
+                            case Conclusion conclusion: return LogReturn(conclusion); // todo: implement stopOnFirst = false
                             // todo: consider what to do if comparators (that contain decisions) are mixed with pure bool comparators (like ScalarValue)
-                            case PositiveEval positive: return positive; 
+                            case PositiveEval positive: return LogReturn(positive); 
                             default: throw new ExecutionException("Unexpected result of type: " + result.GetType().FullName);
                         }
                     }
-                    return null;
+                    return LogReturn(null);
                 case ValueExpressionTree valExp:
-                    return Execute(variableValue, valExp);
+                    return LogReturn(Execute(variableValue, valExp));
                 case Operator_AND_Mapping mapping:
-                    return Execute(variableValue, mapping);
+                    return LogReturn(Execute(variableValue, mapping));
                 case ScalarValue scalar:
                     var res = EvaluateOperator(variableValue, ".equals", new[] { scalar.Value }, scalar.SourceDeshLocation);
                     if (res)
-                        return MarkAsPositive(scalar);
-                    return null;
+                        return LogReturn(MarkAsPositive(scalar));
+                    return LogReturn(null);
                 case UnaryOperator op: // only unary operator here
                     var res2 = EvaluateOperator(variableValue, op.Name, null, op.SourceDeshLocation);
                     if (res2)
-                        return MarkAsPositive(op);
-                    return null;
+                        return LogReturn(MarkAsPositive(op));
+                    return LogReturn(null);
 
                 default:
                     throw new ExecutionException("Unexpected to encounter a comparator of type: " + comparator.GetType().FullName);
@@ -127,10 +128,10 @@ namespace Desh.Execution
                 var match = EvaluateOperator(variableValue, ".equals", new []{ scalarValue.Value }, scalarValue.SourceDeshLocation);
                 if (match)
                 {
-                    return Execute(valueExpressionTree.ThenExpressionBlock);
+                    return LogReturn(Execute(valueExpressionTree.ThenExpressionBlock));
                 }
             }
-            return null;
+            return LogReturn(null);
         }
 
         public EvaluationResult Execute(string variableValue, Operator_AND_Mapping operatorAndMapping)
@@ -141,7 +142,7 @@ namespace Desh.Execution
                 var match = EvaluateOperator(variableValue, @operator.Name, @operator.Arguments, @operator.SourceDeshLocation);
                 if (match == false)
                 {
-                    return null;
+                    return LogReturn(null);
                 }
             }
             
@@ -152,8 +153,8 @@ namespace Desh.Execution
                 var result = Execute(operatorAndMapping.ThenExpressionBlock);
                 switch (result)
                 {
-                    case null: return null;
-                    case Conclusion conclusion: return conclusion; // todo: implement stopOnFirst = false
+                    case null: return LogReturn(null);
+                    case Conclusion conclusion: return LogReturn(conclusion); // todo: implement stopOnFirst = false
                     case PositiveEval _: break; // just continue to the next node (possible 'decide')
                     default: throw new ExecutionException("Unexpected result of type: " + result.GetType().FullName);
                 }
@@ -161,9 +162,38 @@ namespace Desh.Execution
 
             if (operatorAndMapping.Decision != null)
             {
-                return MakeConclusion(operatorAndMapping.Decision);
+                return LogReturn(MakeConclusion(operatorAndMapping.Decision));
             }
-            return MarkAsPositive(operatorAndMapping);
+            return LogReturn(MarkAsPositive(operatorAndMapping));
+        }
+
+        private EvaluationResult LogReturn(EvaluationResult evaluationResult, [CallerFilePath] string callerFilePath = null, [CallerLineNumber] int callerLineNumber = 0,
+            [CallerMemberName] string callerMemberName = null)
+        {
+            var step = new Step
+            {
+                Number = _currentExecutionLogStepNumber++,
+                Timestamp = DateTime.UtcNow,
+                SourceLocation = $"{callerFilePath}:{callerLineNumber}",
+                Type = StepType.ReturnExpressionResult,
+            };
+
+            switch (evaluationResult)
+            {
+                case Conclusion conclusion:
+                    step.Result = conclusion.Decisions.Single();
+                    break;
+                case PositiveEval _:
+                    step.Result = nameof(PositiveEval);
+                    break;
+                case null:
+                    step.Result = "<null>";
+                    break;
+                default:
+                    throw new InvalidOperationException("Unexpected evaluation result: " + evaluationResult);
+            }
+            _executionLogger.AddStep(step);
+            return evaluationResult;
         }
 
         private string EvaluateVariable(Variable variable,
