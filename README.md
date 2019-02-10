@@ -73,4 +73,4 @@ Console.WriteLine($"Visa requirement: {visaDecision}");
 // outputs "Visa requirement: electronic_online_visa"
 ```
 ### What does the name stand for?
-Desh is a *phonetic* abbreviation of **D**ecision **E**xpre**ss**ions.
+**Desh** is a *phonetic* abbreviation of **D**ecision **E**xpre**ss**ions.
