@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
 using Desh.Execution.Logging;
 using Desh.Parsing.Ast;
 #pragma warning disable 1591
@@ -23,7 +24,7 @@ namespace Desh.Execution
             _stopOnFirstAcceptedDecision = stopOnFirstAcceptedDecision;
         }
 
-        public EvaluationResult Execute(ExpressionBlock expressionBlock)
+        public async Task<EvaluationResult> Execute(ExpressionBlock expressionBlock)
         {
             switch (expressionBlock)
             {
@@ -32,7 +33,7 @@ namespace Desh.Execution
                 case Expression_OR_List list:
                     foreach (var expressionAndMapping in list.ExpressionAndMappings)
                     {
-                        var result = Execute(expressionAndMapping);
+                        var result = await Execute(expressionAndMapping);
                         switch (result)
                         {
                             case null: break; // just continue to the next node
@@ -44,20 +45,20 @@ namespace Desh.Execution
                     }
                     return LogReturn(null);
                 case Expression_AND_Mapping map:
-                    return LogReturn(Execute(map));
+                    return LogReturn(await Execute(map));
                 default: throw new ExecutionException("Unexpected result of type: " + expressionBlock.GetType().FullName);
             }
         }
 
-        public EvaluationResult Execute(Expression_AND_Mapping expressionAndMapping)
+        public async Task<EvaluationResult> Execute(Expression_AND_Mapping expressionAndMapping)
         {
             foreach (var expressionPair in expressionAndMapping.NormalPairs)
             {
                 // todo: anyIsTrue
                 var variable = expressionPair.Key;
-                var variableValue = EvaluateVariable(variable);
+                var variableValue = await EvaluateVariable(variable);
                 var comparator = expressionPair.Value;
-                var result = Execute(variableValue, comparator);
+                var result = await Execute(variableValue, comparator);
                 switch (result)
                 {
                     case null: return LogReturn(null);
@@ -69,7 +70,7 @@ namespace Desh.Execution
 
             if (expressionAndMapping.ThenExpressionBlock != null)
             {
-                var result = Execute(expressionAndMapping.ThenExpressionBlock);
+                var result = await Execute(expressionAndMapping.ThenExpressionBlock);
                 switch (result) //todo: remove duplication
                 {
                     case null: return LogReturn(null);
@@ -83,14 +84,14 @@ namespace Desh.Execution
             return LogReturn(MarkAsPositive(expressionAndMapping));
         }
 
-        public EvaluationResult Execute(string variableValue, Comparator comparator)
+        public async Task<EvaluationResult> Execute(string variableValue, Comparator comparator)
         {
             switch (comparator)
             {
                 case ComparatorOrList list:
                     foreach (var comp in list.Comparators)
                     {
-                        var result = Execute(variableValue, comp);
+                        var result = await Execute(variableValue, comp);
                         switch(result)
                         {
                             case null: break; // just continue to the next node
@@ -102,9 +103,9 @@ namespace Desh.Execution
                     }
                     return LogReturn(null);
                 case ValueExpressionTree valExp:
-                    return LogReturn(Execute(variableValue, valExp));
+                    return LogReturn(await Execute(variableValue, valExp));
                 case Operator_AND_Mapping mapping:
-                    return LogReturn(Execute(variableValue, mapping));
+                    return LogReturn(await Execute(variableValue, mapping));
                 case ScalarValue scalar:
                     var res = EvaluateOperator(variableValue, ".equals", new[] { scalar.Value }, scalar.SourceDeshLocation);
                     if (res)
@@ -121,20 +122,20 @@ namespace Desh.Execution
             }
         }
 
-        public EvaluationResult Execute(string variableValue, ValueExpressionTree valueExpressionTree)
+        public async Task<EvaluationResult> Execute(string variableValue, ValueExpressionTree valueExpressionTree)
         {
             foreach (var scalarValue in valueExpressionTree.ScalarValues)
             {
                 var match = EvaluateOperator(variableValue, ".equals", new []{ scalarValue.Value }, scalarValue.SourceDeshLocation);
                 if (match)
                 {
-                    return LogReturn(Execute(valueExpressionTree.ThenExpressionBlock));
+                    return LogReturn(await Execute(valueExpressionTree.ThenExpressionBlock));
                 }
             }
             return LogReturn(null);
         }
 
-        public EvaluationResult Execute(string variableValue, Operator_AND_Mapping operatorAndMapping)
+        public async Task<EvaluationResult> Execute(string variableValue, Operator_AND_Mapping operatorAndMapping)
         {
             foreach (var @operator in operatorAndMapping.Operators)
             {
@@ -150,7 +151,7 @@ namespace Desh.Execution
             //
             if (operatorAndMapping.ThenExpressionBlock != null)
             {
-                var result = Execute(operatorAndMapping.ThenExpressionBlock);
+                var result = await Execute(operatorAndMapping.ThenExpressionBlock);
                 switch (result)
                 {
                     case null: return LogReturn(null);
@@ -196,7 +197,7 @@ namespace Desh.Execution
             return evaluationResult;
         }
 
-        private string EvaluateVariable(Variable variable,
+        private async Task<string> EvaluateVariable(Variable variable,
             [CallerFilePath] string callerFilePath = null, [CallerLineNumber] int callerLineNumber = 0,
             [CallerMemberName] string callerMemberName = null)
         {
@@ -211,7 +212,7 @@ namespace Desh.Execution
             };
             try
             {
-                var variableValue = _variableEvaluator.Evaluate(variable.Name);
+                var variableValue = await _variableEvaluator.Evaluate(variable.Name);
                 step.VariableValue = variableValue;
                 return variableValue;
             }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace Desh.Test
@@ -104,18 +105,18 @@ namespace Desh.Test
 ";
         [Theory]
         [MemberData(nameof(YamlTestReader.GetData), parameters: "SLA.tests.yaml", MemberType = typeof(YamlTestReader))]
-        public void Grammar_v010a(string name, TestCaseSource source, string desh, Dictionary<string, string> vars, string expectedDecision)
+        public async Task Grammar_v010a(string name, TestCaseSource source, string desh, Dictionary<string, string> vars, string expectedDecision)
         {
-            ParseExecuteTestRunner.AssertPicksCorrectDecision(name, source, desh, vars, expectedDecision);
+            await ParseExecuteTestRunner.AssertPicksCorrectDecision(name, source, desh, vars, expectedDecision);
         }
 
         [Theory(Skip = "Not implemented")]
         [InlineData(
             "{domestic_request: 'yes', service_paid_date: '2018-12-17 14:12:34', channel: 'desh-trans.nl', transport_type: 'ship'}",
             "2018-12-24")]
-        public void Grammar_v020(string contextJson, string expectedDecision)
+        public async Task Grammar_v020(string contextJson, string expectedDecision)
         {
-            ParseExecuteTestRunner.AssertPicksCorrectDecision(Grammar_020, contextJson, expectedDecision);
+            await ParseExecuteTestRunner.AssertPicksCorrectDecision(Grammar_020, contextJson, expectedDecision);
         }
     }
 }

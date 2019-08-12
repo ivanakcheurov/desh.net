@@ -62,13 +62,13 @@ nationality:
               - no: paper_visa
 ";
 var customer =
-  new Dictionary<string, Func<string>>
-  {
-    { "nationality", () => "NL" }, 
-    { "destination", () => "US" }
-  };
+	new Dictionary<string, Func<Task<string>>>
+	{
+		{ "nationality", () => Task.FromResult("NL") },
+		{ "destination", () => Task.FromResult("US") }
+	};
 var facade = new DeshFacade();
-var visaDecision = facade.ParseAndMakeStringDecision(desh, customer);
+var visaDecision = await facade.ParseAndMakeStringDecision(desh, customer);
 Console.WriteLine($"Visa requirement: {visaDecision}");
 // outputs "Visa requirement: electronic_online_visa"
 ```

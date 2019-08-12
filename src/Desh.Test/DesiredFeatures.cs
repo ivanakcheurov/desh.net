@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace Desh.Test
@@ -32,9 +33,9 @@ vehicle_type:
         [InlineData(DecideExtend, "{vehicle_type: 'van', has_rear_camera: 'no'}", "['diesel']")]
         [InlineData(DecideExtend, "{vehicle_type: 'jet', has_rear_camera: 'yes'}", null)] // kerosene
         [InlineData(DecideExtend, "{vehicle_type: 'jet', has_rear_camera: 'no'}", null)]
-        public void Picks_correct_decision(string desh, string contextJson, string expectedDecision)
+        public async Task Picks_correct_decision(string desh, string contextJson, string expectedDecision)
         {
-            ParseExecuteTestRunner.AssertPicksCorrectDecision(desh, contextJson, expectedDecision);
+            await ParseExecuteTestRunner.AssertPicksCorrectDecision(desh, contextJson, expectedDecision);
         }
     }
 }

@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Security.Cryptography;
+using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Xunit;
 
@@ -8,17 +10,17 @@ namespace Desh.Test
 {
     class ParseExecuteTestRunner
     {
-        public static void AssertPicksCorrectDecision(string desh, string contextJson, string expectedDecision)
+        public static async Task AssertPicksCorrectDecision(string desh, string contextJson, string expectedDecision)
         {
             var vars = JsonConvert.DeserializeObject<Dictionary<string, string>>(contextJson);
-            AssertPicksCorrectDecision(null, null, desh, vars, expectedDecision);
+            await AssertPicksCorrectDecision(null, null, desh, vars, expectedDecision);
         }
-        public static void AssertPicksCorrectDecision(string name, TestCaseSource source, string desh, Dictionary<string, string> vars, string expectedDecision)
+        public static async Task AssertPicksCorrectDecision(string name, TestCaseSource source, string desh, Dictionary<string, string> vars, string expectedDecision)
         {
             var facade = new DeshFacade();
             var actualDecision =
-                facade.ParseAndMakeStringDecision(desh,
-                    vars.ToImmutableDictionary(kvp => kvp.Key, kvp => new Func<string>(() => kvp.Value)),
+                await facade.ParseAndMakeStringDecision(desh,
+                    vars.ToImmutableDictionary(kvp => kvp.Key, kvp => new Func<Task<string>>(() => Task.FromResult(kvp.Value))),
                     null);
 
             

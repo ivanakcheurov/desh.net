@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using Desh.Execution;
 using Desh.OutOfTheBox;
 using Desh.Parsing;
@@ -23,12 +24,12 @@ namespace Desh
         /// <param name="variableEvaluations">variables and how to get their values</param>
         /// <param name="customOperatorEvaluations">operators and how to apply them to a variable value and arguments</param>
         /// <returns>a single string decision obtained by executing business rules specified in desh</returns>
-        public string ParseAndMakeStringDecision(string desh,
-            IReadOnlyDictionary<string, Func<string>> variableEvaluations,
+        public async Task<string> ParseAndMakeStringDecision(string desh,
+            IReadOnlyDictionary<string, Func<Task<string>>> variableEvaluations,
             IReadOnlyDictionary<string, Func<string, string[], bool>> customOperatorEvaluations = null)
         {
-            return ParseAndMakeStringDecision(desh, variableEvaluations, customOperatorEvaluations, out string parseLog,
-                out string abstractSyntaxTreeYaml, out string executionLogYaml);
+            var(decision, _, _, _) = await ParseAndMakeStringDecisionWithLogs(desh, variableEvaluations, customOperatorEvaluations);
+            return decision;
         }
 
         /// <summary>
@@ -41,16 +42,15 @@ namespace Desh
         /// <param name="abstractSyntaxTreeYaml">YAML version of the Abstract Syntax Tree parsed from <paramref name="desh"/></param>
         /// <param name="executionLogYaml">YAML version of the log after the engine has executed <paramref name="desh"/></param>
         /// <returns>a single string decision obtained by executing business rules specified in desh</returns>
-        public string ParseAndMakeStringDecision(string desh,
-            IReadOnlyDictionary<string, Func<string>> variableEvaluations,
-            IReadOnlyDictionary<string, Func<string, string[], bool>> customOperatorEvaluations,
-            out string parseLog, out string abstractSyntaxTreeYaml, out string executionLogYaml)
+        public async Task<(string decision, string parseLog, string abstractSyntaxTreeYaml, string executionLogYaml)> ParseAndMakeStringDecisionWithLogs(string desh,
+            IReadOnlyDictionary<string, Func<Task<string>>> variableEvaluations,
+            IReadOnlyDictionary<string, Func<string, string[], bool>> customOperatorEvaluations)
         {
-            var parsedDeshAst = Parse(desh, variableEvaluations.Keys, customOperatorEvaluations?.Keys, out parseLog,
-                out abstractSyntaxTreeYaml);
+            var parsedDeshAst = Parse(desh, variableEvaluations.Keys, customOperatorEvaluations?.Keys, out string parseLog,
+                out string abstractSyntaxTreeYaml);
 
-            var result = MakeStringDecision(parsedDeshAst, variableEvaluations, customOperatorEvaluations, out executionLogYaml);
-            return result;
+            var (decision, executionLogYaml) = await MakeStringDecision(parsedDeshAst, variableEvaluations, customOperatorEvaluations);
+            return (decision, parseLog, abstractSyntaxTreeYaml, executionLogYaml);
         }
 
         /// <summary>
@@ -61,12 +61,12 @@ namespace Desh
         /// <param name="customOperatorEvaluations">operators and how to apply them to a variable value and arguments</param>
         /// <returns>a True/False decision obtained by executing business rules specified in desh.
         /// Note: there desh should be designed in such a way to return only PositiveEval or nothing</returns>
-        public bool ParseAndMakeBooleanDecision(string desh,
-            IReadOnlyDictionary<string, Func<string>> variableEvaluations,
+        public async Task<bool> ParseAndMakeBooleanDecision(string desh,
+            IReadOnlyDictionary<string, Func<Task<string>>> variableEvaluations,
             IReadOnlyDictionary<string, Func<string, string[], bool>> customOperatorEvaluations)
         {
-            return ParseAndMakeBooleanDecision(desh, variableEvaluations, customOperatorEvaluations, out string parseLog,
-                out string abstractSyntaxTreeYaml, out string executionLogYaml);
+            var (decision, _, _, _) = await ParseAndMakeBooleanDecisionWithLog(desh, variableEvaluations, customOperatorEvaluations);
+            return decision;
         }
 
         /// <summary>
@@ -80,16 +80,15 @@ namespace Desh
         /// <param name="executionLogYaml">YAML version of the log after the engine has executed <paramref name="desh"/></param>
         /// <returns>a True/False decision obtained by executing business rules specified in desh.
         /// Note: there desh should be designed in such a way to return only PositiveEval or nothing</returns>
-        public bool ParseAndMakeBooleanDecision(string desh,
-            IReadOnlyDictionary<string, Func<string>> variableEvaluations,
-            IReadOnlyDictionary<string, Func<string, string[], bool>> customOperatorEvaluations,
-            out string parseLog, out string abstractSyntaxTreeYaml, out string executionLogYaml)
+        public async Task<(bool decision, string parseLog, string abstractSyntaxTreeYaml, string executionLogYaml)> ParseAndMakeBooleanDecisionWithLog(string desh,
+            IReadOnlyDictionary<string, Func<Task<string>>> variableEvaluations,
+            IReadOnlyDictionary<string, Func<string, string[], bool>> customOperatorEvaluations)
         {
-            var parsedDeshAst = Parse(desh, variableEvaluations.Keys, customOperatorEvaluations?.Keys, out parseLog,
-                out abstractSyntaxTreeYaml);
+            var parsedDeshAst = Parse(desh, variableEvaluations.Keys, customOperatorEvaluations?.Keys, out string parseLog,
+                out string abstractSyntaxTreeYaml);
 
-            var result = MakeBoolDecision(parsedDeshAst, variableEvaluations, customOperatorEvaluations, out executionLogYaml);
-            return result;
+            var (result, executionLogYaml) = await MakeBoolDecision(parsedDeshAst, variableEvaluations, customOperatorEvaluations);
+            return (result, parseLog, abstractSyntaxTreeYaml, executionLogYaml);
         }
 
         /// <summary>
@@ -100,18 +99,17 @@ namespace Desh
         /// <param name="customOperatorEvaluations">operators and how to apply them to a variable value and arguments</param>
         /// <param name="executionLogYaml">YAML version of the log after the engine has executed <paramref name="parsedDeshAst"/></param>
         /// <returns>a single string decision obtained by executing business rules specified in desh</returns>
-        public string MakeStringDecision(ExpressionBlock parsedDeshAst,
-            IReadOnlyDictionary<string, Func<string>> variableEvaluations,
-            IReadOnlyDictionary<string, Func<string, string[], bool>> customOperatorEvaluations,
-            out string executionLogYaml)
+        public async Task<(string result, string executionLogYaml)> MakeStringDecision(ExpressionBlock parsedDeshAst,
+            IReadOnlyDictionary<string, Func<Task<string>>> variableEvaluations,
+            IReadOnlyDictionary<string, Func<string, string[], bool>> customOperatorEvaluations)
         {
-            var result = ExecuteInternal(parsedDeshAst, variableEvaluations, customOperatorEvaluations, out executionLogYaml);
+            var (result, executionLogYaml) = await ExecuteInternal(parsedDeshAst, variableEvaluations, customOperatorEvaluations);
             switch (result)
             {
                 case Conclusion conclusion:
-                    return conclusion.Decisions.Single();
+                    return (conclusion.Decisions.Single(), executionLogYaml);
                 case null:
-                    return null;
+                    return (null, executionLogYaml);
                 default:
                     throw new InvalidOperationException("Unexpected type of EvaluationResult: " + result);
             }
@@ -126,27 +124,25 @@ namespace Desh
         /// <param name="executionLogYaml">YAML version of the log after the engine has executed <paramref name="parsedDeshAst"/></param>
         /// <returns>a True/False decision obtained by executing business rules specified in desh.
         /// Note: there desh should be designed in such a way to return only PositiveEval or nothing</returns>
-        public bool MakeBoolDecision(ExpressionBlock parsedDeshAst,
-            IReadOnlyDictionary<string, Func<string>> variableEvaluations,
-            IReadOnlyDictionary<string, Func<string, string[], bool>> customOperatorEvaluations,
-            out string executionLogYaml)
+        public async Task<(bool result, string executionLogYaml)> MakeBoolDecision(ExpressionBlock parsedDeshAst,
+            IReadOnlyDictionary<string, Func<Task<string>>> variableEvaluations,
+            IReadOnlyDictionary<string, Func<string, string[], bool>> customOperatorEvaluations)
         {
-            var result = ExecuteInternal(parsedDeshAst, variableEvaluations, customOperatorEvaluations, out executionLogYaml);
+            var (result, executionLogYaml) = await ExecuteInternal(parsedDeshAst, variableEvaluations, customOperatorEvaluations);
             switch (result)
             {
                 case PositiveEval _:
-                    return true;
+                    return (true, executionLogYaml);
                 case null:
-                    return false;
+                    return (false, executionLogYaml);
                 default:
                     throw new InvalidOperationException("Unexpected type of EvaluationResult: " + result);
             }
         }
 
-        private EvaluationResult ExecuteInternal(ExpressionBlock parsedDeshAst,
-            IReadOnlyDictionary<string, Func<string>> variableEvaluations,
-            IReadOnlyDictionary<string, Func<string, string[], bool>> customOperatorEvaluations,
-            out string executionLogYaml)
+        private async Task<(EvaluationResult result, string executionLogYaml)> ExecuteInternal(ExpressionBlock parsedDeshAst,
+            IReadOnlyDictionary<string, Func<Task<string>>> variableEvaluations,
+            IReadOnlyDictionary<string, Func<string, string[], bool>> customOperatorEvaluations)
         {
             var variableEvaluator = new LambdaVariableEvaluator(variableEvaluations);
             var operators = StandardOperators.Get().Concat(customOperatorEvaluations ?? Enumerable.Empty<KeyValuePair<string, Func<string, string[], bool>>>())
@@ -156,9 +152,9 @@ namespace Desh
             var executionLogger = new ExecutionLogger();
             var engine = new Engine(variableEvaluator, operatorEvaluator, executionLogger, true);
             executionLogger.Initialize(parsedDeshAst.SourceDesh, engine);
-            var result = engine.Execute(parsedDeshAst);
-            executionLogYaml = new SerializerBuilder().Build().Serialize(executionLogger.GetLog());
-            return result;
+            var result = await engine.Execute(parsedDeshAst);
+            string executionLogYaml = new SerializerBuilder().Build().Serialize(executionLogger.GetLog());
+            return (result, executionLogYaml);
         }
 
         /// <summary>

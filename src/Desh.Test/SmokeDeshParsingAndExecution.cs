@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using Desh.Execution;
 using Desh.Parsing;
 using Newtonsoft.Json;
@@ -28,46 +29,6 @@ someProp:
               decide: decision_C
 decide: YES
 ";
-
-        public class VariableEvaluator : IVariableEvaluator, INameRecognizer
-        {
-            private readonly Dictionary<string, string> _variableValues;
-
-            public VariableEvaluator(Dictionary<string, string> variableValues)
-            {
-                _variableValues = variableValues;
-            }
-
-            public string Evaluate(string variable)
-            {
-                return _variableValues[variable];
-            }
-
-            public bool Recognize(string name)
-            {
-                return _variableValues.ContainsKey(name);
-            }
-        }
-
-        public class OperatorEvaluator : IOperatorEvaluator, INameRecognizer
-        {
-            private readonly Dictionary<string, Func<string, string[], bool>> _operators;
-
-            public OperatorEvaluator(Dictionary<string, Func<string, string[], bool>> operators)
-            {
-                _operators = operators;
-            }
-
-            public bool Evaluate(string variableValue, string operatorName, string[] arguments)
-            {
-                return _operators[operatorName](variableValue, arguments);
-            }
-
-            public bool Recognize(string name)
-            {
-                return _operators.ContainsKey(name);
-            }
-        }
 
         [Theory]
         [InlineData(Desh, "{someProp: 'ho', thirdProp: 'thirdValue'}", "decision_C")]
@@ -219,9 +180,9 @@ a:
   - X: decision_A
   - Y: 
         then: decision_B", "{a: 'Y'}", "decision_B")]
-        public void Picks_correct_decision(string desh, string contextJson, string expectedDecision)
+        public async Task Picks_correct_decision(string desh, string contextJson, string expectedDecision)
         {
-            ParseExecuteTestRunner.AssertPicksCorrectDecision(desh, contextJson, expectedDecision);
+            await ParseExecuteTestRunner.AssertPicksCorrectDecision(desh, contextJson, expectedDecision);
         }
 
         //public void OtherTest()

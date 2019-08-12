@@ -1,7 +1,9 @@
-﻿namespace Desh.Execution
+﻿using System.Threading.Tasks;
+
+namespace Desh.Execution
 {
     public interface IVariableEvaluator
     {
-        string Evaluate(string variable);
+        Task<string> Evaluate(string variable);
     }
 }

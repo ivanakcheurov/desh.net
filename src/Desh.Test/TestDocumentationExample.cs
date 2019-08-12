@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace Desh.Test
@@ -8,8 +9,9 @@ namespace Desh.Test
     public class TestDocumentationExample
     {
         [Fact]
-        public void TestVisaExample()
+        public async Task TestVisaExample()
         {
+            // ReSharper disable Xunit.XunitTestWithConsoleOutput
             var desh = @"
 nationality:
   - NL:
@@ -29,13 +31,14 @@ nationality:
               - no: paper_visa
 ";
             var customer =
-                new Dictionary<string, Func<string>>
+                new Dictionary<string, Func<Task<string>>>
                 {
-                    { "nationality", () => "NL" },
-                    { "destination", () => "US" }
+                    { "nationality", () => Task.FromResult("NL") },
+                    { "destination", () => Task.FromResult("US") }
                 };
             var facade = new DeshFacade();
-            var visaDecision = facade.ParseAndMakeStringDecision(desh, customer);
+            var visaDecision = await facade.ParseAndMakeStringDecision(desh, customer);
+            Console.WriteLine($"Visa requirement: {visaDecision}");
             Assert.Equal("electronic_online_visa", visaDecision);
         }
     }
