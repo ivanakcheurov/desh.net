@@ -1,8 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using Desh.Execution;
+﻿using Desh.Execution;
 using Desh.Parsing;
+using System;
+using System.Collections.Generic;
 
 namespace Desh.OutOfTheBox
 {

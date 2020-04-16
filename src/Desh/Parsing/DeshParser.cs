@@ -1,8 +1,7 @@
-﻿using System;
+﻿using Desh.Parsing.Ast;
+using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using Desh.Parsing.Ast;
 using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
 using YamlDotNet.Serialization;

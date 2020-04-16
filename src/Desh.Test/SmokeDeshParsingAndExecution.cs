@@ -1,11 +1,4 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using System.Threading.Tasks;
-using Desh.Execution;
-using Desh.Parsing;
-using Newtonsoft.Json;
 using Xunit;
 
 namespace Desh.Test
