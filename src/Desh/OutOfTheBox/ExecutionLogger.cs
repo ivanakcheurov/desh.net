@@ -13,7 +13,6 @@ namespace Desh.OutOfTheBox
     {
         private readonly Log _log;
         private readonly Dictionary<int, Step> _logSteps = new Dictionary<int, Step>();
-        private int _currentStepNumber = 1;
 
         public ExecutionLogger()
         {

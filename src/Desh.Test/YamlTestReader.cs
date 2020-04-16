@@ -16,7 +16,7 @@ namespace Desh.Test
             var deserializer =
                 new DeserializerBuilder()
                     .WithNodeDeserializer(new TestCaseWithSourceDeserializer{Resource = filename })
-                    .WithNamingConvention(new CamelCaseNamingConvention())
+                    .WithNamingConvention(CamelCaseNamingConvention.Instance)
                     .Build();
             var testCases = deserializer.Deserialize<List<TestCaseWithSource>>(File.ReadAllText(filename));
             foreach (var testCase in testCases)
