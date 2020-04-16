@@ -11,7 +11,7 @@ Desh is a concise and readable language to describe business rules.
 ## How to use
 Just install the [Desh NuGet package](https://www.nuget.org/packages/desh/):
 ```
-PM> Install-Package YamlDotNet
+PM> Install-Package desh
 ```
 Craft a Desh document (YAML).
 
