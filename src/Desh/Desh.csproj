@@ -17,6 +17,8 @@ desh (Decision Expressions) is a concise language for defining business rules.</
     <PackageTags>business-rules, decision-tree, DSL</PackageTags>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <AssemblyName>desh</AssemblyName>
+    <Version>0.0.0-unset</Version>
+    <PackageVersion>0.0.0-unset</PackageVersion>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
