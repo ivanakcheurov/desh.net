@@ -1,12 +1,11 @@
-﻿using System;
+﻿using Desh.Execution;
+using Desh.Execution.Logging;
+using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 using System.Security.Cryptography;
 using System.Text;
-using Desh.Execution;
-using Desh.Execution.Logging;
 
 namespace Desh.OutOfTheBox
 {
@@ -14,7 +13,6 @@ namespace Desh.OutOfTheBox
     {
         private readonly Log _log;
         private readonly Dictionary<int, Step> _logSteps = new Dictionary<int, Step>();
-        private int _currentStepNumber = 1;
 
         public ExecutionLogger()
         {

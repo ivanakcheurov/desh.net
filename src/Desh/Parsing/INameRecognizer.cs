@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Desh.Parsing
+﻿namespace Desh.Parsing
 {
     public interface INameRecognizer
     {

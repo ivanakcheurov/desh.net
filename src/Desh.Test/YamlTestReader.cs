@@ -1,12 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Text;
-using Desh.Parsing;
-using Desh.Parsing.Ast;
 using Xunit;
 using YamlDotNet.Core;
-using YamlDotNet.Core.Events;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
 
@@ -20,7 +16,7 @@ namespace Desh.Test
             var deserializer =
                 new DeserializerBuilder()
                     .WithNodeDeserializer(new TestCaseWithSourceDeserializer{Resource = filename })
-                    .WithNamingConvention(new CamelCaseNamingConvention())
+                    .WithNamingConvention(CamelCaseNamingConvention.Instance)
                     .Build();
             var testCases = deserializer.Deserialize<List<TestCaseWithSource>>(File.ReadAllText(filename));
             foreach (var testCase in testCases)
