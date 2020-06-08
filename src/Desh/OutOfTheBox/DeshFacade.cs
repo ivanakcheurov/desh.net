@@ -103,15 +103,12 @@ namespace Desh
             IReadOnlyDictionary<string, Func<string, string[], bool>> customOperatorEvaluations)
         {
             var (result, executionLogYaml) = await ExecuteInternal(parsedDeshAst, variableEvaluations, customOperatorEvaluations);
-            switch (result)
+            return result switch
             {
-                case Conclusion conclusion:
-                    return (conclusion.Decisions.Single(), executionLogYaml);
-                case null:
-                    return (null, executionLogYaml);
-                default:
-                    throw new InvalidOperationException("Unexpected type of EvaluationResult: " + result);
-            }
+                Conclusion conclusion => (conclusion.Decisions.Single(), executionLogYaml),
+                null => (null, executionLogYaml),
+                _ => throw new InvalidOperationException("Unexpected type of EvaluationResult: " + result)
+            };
         }
 
         /// <summary>
@@ -128,15 +125,12 @@ namespace Desh
             IReadOnlyDictionary<string, Func<string, string[], bool>> customOperatorEvaluations)
         {
             var (result, executionLogYaml) = await ExecuteInternal(parsedDeshAst, variableEvaluations, customOperatorEvaluations);
-            switch (result)
+            return result switch
             {
-                case PositiveEval _:
-                    return (true, executionLogYaml);
-                case null:
-                    return (false, executionLogYaml);
-                default:
-                    throw new InvalidOperationException("Unexpected type of EvaluationResult: " + result);
-            }
+                PositiveEval _ => (true, executionLogYaml),
+                null => (false, executionLogYaml),
+                _ => throw new InvalidOperationException("Unexpected type of EvaluationResult: " + result)
+            };
         }
 
         private async Task<(EvaluationResult result, string executionLogYaml)> ExecuteInternal(ExpressionBlock parsedDeshAst,
@@ -210,7 +204,7 @@ namespace Desh
 
         public class NameRecognizer : INameRecognizer
         {
-            private HashSet<string> _knownNames;
+            private readonly HashSet<string> _knownNames;
 
             public NameRecognizer(IEnumerable<string> knownNames)
             {

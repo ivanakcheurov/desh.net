@@ -179,20 +179,13 @@ namespace Desh.Execution
                 Type = StepType.ReturnExpressionResult,
             };
 
-            switch (evaluationResult)
+            step.Result = evaluationResult switch
             {
-                case Conclusion conclusion:
-                    step.Result = conclusion.Decisions.Single();
-                    break;
-                case PositiveEval _:
-                    step.Result = nameof(PositiveEval);
-                    break;
-                case null:
-                    step.Result = "<null>";
-                    break;
-                default:
-                    throw new InvalidOperationException("Unexpected evaluation result: " + evaluationResult);
-            }
+                Conclusion conclusion => conclusion.Decisions.Single(),
+                PositiveEval _ => nameof(PositiveEval),
+                null => "<null>",
+                _ => throw new InvalidOperationException("Unexpected evaluation result: " + evaluationResult)
+            };
             _executionLogger.AddStep(step);
             return evaluationResult;
         }

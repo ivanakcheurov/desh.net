@@ -34,17 +34,14 @@ namespace Desh.Parsing
                     .Build();
 
             //Dictionary<string, string[]> map;
-            using (var reader = new StringReader(desh))
-            {
-                var eventReader = new Parser(reader);
-                // Consume the stream start event "manually"
-                // https://stackoverflow.com/questions/27490434/does-yamldotnet-library-support-the-document-separator
-                eventReader.Consume<StreamStart>();
-                //map = deserializer.Deserialize<Dictionary<string, string[]>>(eventReader);
-                var decisionTree = deserializer.Deserialize<ExpressionBlock>(eventReader);
-                return decisionTree;
-            }
-
+            using var reader = new StringReader(desh);
+            var eventReader = new Parser(reader);
+            // Consume the stream start event "manually"
+            // https://stackoverflow.com/questions/27490434/does-yamldotnet-library-support-the-document-separator
+            eventReader.Consume<StreamStart>();
+            //map = deserializer.Deserialize<Dictionary<string, string[]>>(eventReader);
+            var decisionTree = deserializer.Deserialize<ExpressionBlock>(eventReader);
+            return decisionTree;
         }
     }
 
