@@ -13,15 +13,13 @@ namespace Desh.Execution
         private readonly IVariableEvaluator _variableEvaluator;
         private readonly IOperatorEvaluator _operatorEvaluator;
         private readonly IExecutionLogger _executionLogger;
-        private bool _stopOnFirstAcceptedDecision;
         private int _currentExecutionLogStepNumber = 1;
 
-        public Engine(IVariableEvaluator variableEvaluator, IOperatorEvaluator operatorEvaluator, IExecutionLogger executionLogger, bool stopOnFirstAcceptedDecision)
+        public Engine(IVariableEvaluator variableEvaluator, IOperatorEvaluator operatorEvaluator, IExecutionLogger executionLogger)
         {
             _variableEvaluator = variableEvaluator;
             _operatorEvaluator = operatorEvaluator;
             _executionLogger = executionLogger;
-            _stopOnFirstAcceptedDecision = stopOnFirstAcceptedDecision;
         }
 
         public async Task<EvaluationResult> Execute(ExpressionBlock expressionBlock)
@@ -139,14 +137,13 @@ namespace Desh.Execution
         {
             foreach (var @operator in operatorAndMapping.Operators)
             {
-                
                 var match = EvaluateOperator(variableValue, @operator.Name, @operator.Arguments, @operator.SourceDeshLocation);
                 if (match == false)
                 {
                     return LogReturn(null);
                 }
             }
-            
+
             // todo: consider allowing ThenExpressionBlock and Decision be specified at the same time
             //
             if (operatorAndMapping.ThenExpressionBlock != null)

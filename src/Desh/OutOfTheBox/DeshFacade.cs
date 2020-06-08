@@ -143,7 +143,7 @@ namespace Desh
             var operatorEvaluator = new LambdaOperatorEvaluator(operators);
 
             var executionLogger = new ExecutionLogger();
-            var engine = new Engine(variableEvaluator, operatorEvaluator, executionLogger, true);
+            var engine = new Engine(variableEvaluator, operatorEvaluator, executionLogger);
             executionLogger.Initialize(parsedDeshAst.SourceDesh, engine);
             var result = await engine.Execute(parsedDeshAst);
             string executionLogYaml = new SerializerBuilder().Build().Serialize(executionLogger.GetLog());
