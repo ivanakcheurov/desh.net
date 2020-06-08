@@ -16,7 +16,7 @@ namespace Desh.OutOfTheBox
 
         public ExecutionLogger()
         {
-            _log = new Log() { Steps = new Dictionary<int, Step>() };
+            _log = new Log { Steps = new Dictionary<int, Step>() };
         }
 
         /// <summary>
@@ -49,17 +49,13 @@ namespace Desh.OutOfTheBox
             return _log;
         }
 
-        public string GetMd5(string text)
+        private string GetMd5(string text)
         {
-            using (var md5 = MD5.Create())
-            {
-                using (var stream = new MemoryStream(Encoding.UTF8.GetBytes(text)))
-                {
-                    var hash = md5.ComputeHash(stream);
-                    var hashString = BitConverter.ToString(hash).Replace("-", "").ToLowerInvariant();
-                    return hashString;
-                }
-            }
+            using var md5 = MD5.Create();
+            using var stream = new MemoryStream(Encoding.UTF8.GetBytes(text));
+            var hash = md5.ComputeHash(stream);
+            var hashString = BitConverter.ToString(hash).Replace("-", "").ToLowerInvariant();
+            return hashString;
         }
     }
 }
